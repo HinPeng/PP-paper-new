@@ -1,0 +1,68 @@
+%!TEX root = main.tex
+\section{Implementation}
+\label{sec:imp}
+In this section, we will introduce how to compile and then profile a model in PyTorch.
+Meanwhile, we also introduce the implementation of the memory swapping and recomputation.
+Although the implementations are customized to the PyTorch framework,
+the overall method of this paper is applicable for other DL frameworks, such as TensorFlow~\cite{abadiTensorFlowSystemLargeScale2016}.
+
+\subsection{Compilation and Profiling}
+\textbf{Compilation:} The essence of model compilation in this paper is
+to obtain its fine-grained computation graph,
+which can expanding the model partitioning and memory optimization space
+while facilitating the automatic generation of each pipeline stage's module code.
+It does not require the internal splitting and
+tracking of an operator as in tensor parallelism.
+Therefore, we utilize the \texttt{torch.fx}~\cite{reedTorchFxPractical2022}
+provided by the official PyTorch to transform the model provided by the user scripts.
+The \texttt{torch.fx} library is a pure Python system for
+capturing and transforming the neural network structure in PyTorch through tracing.
+It does not break down and trace the internal computations of nn.Module operators.
+Users can freely modify the captured computation graph,
+and torch.fx can generate corresponding Python code based on the modified computation graph.
+
+\textbf{Profiling}: Regarding profiling the forward and backward
+computation time of nodes after compilation,
+we inserts timing hook functions to the start and the end of the corresponding computations.
+The first few training iterations during warmup phase are excluded,
+and then calculate the average value of 50 batches of stable iterations.
+As for obtaining the memory size of activations, parameters, and optimizer states,
+a proxy input tensors with the same size are passed to the computation graph
+and executing the graph once.
+During this process, the corresponding memory sizes can be obtained
+from the result tensors once a node's computation is finished.
+Meanwhile, the saved tensor information of a node
+can also be got from this graph running process.
+Specifically, we achieve this through registering the hook function
+\texttt{torch.autograd.graph.saved\_tensors\_hooks} provided by PyTorch to each node.
+
+\subsection{Swap and Recomputation}
+\textbf{Memory swap:} The PyTorch does not support memory swapping operations currently.
+Although a tensor can be copied to the target device through
+a simple \texttt{Tensor.to(device)} interface,
+the underlying GPU memory of the tensor cannot be released
+without deleting the tensor object when the data transfer is completed.
+Therefore, we modifies the underlying source code of the tensor data structure in PyTorch,
+through adding two functions that can directly release the underlying
+GPU memory without deleting the tensor object,
+and set the underlying memory address to the address provided by the parameter.
+This allows for the release of underlying memory after memory swapping out,
+and the setting of the original tensor's memory address to
+the address of the swapped-in tensor.
+As for when to trigger memory swapping operations,
+we uses the hook registration function in PyTorch to insert
+the memory operations to the corresponding position.
+This step is before the model training,
+and then the memory swapping operations will always be carried out
+according to this strategy during the pipeline parallel training.
+
+\textbf{Recomputation:} PyTorch provides
+the \texttt{torch.utils.checkpoint} library for recomputation.
+It is implemented by rewriting the parts of the module code that need recomputation.
+It initializes the recomputation process when the corresponding backward computation just begins,
+which can also be called as on-demand recomputation.
+Since we do not need another GPU stream for early recomputation process,
+the functionality provided by this library is sufficient enough.
+In the meantime,
+the module codes for the recomputation of each stage are
+also automatically generated during the module code generation phase.

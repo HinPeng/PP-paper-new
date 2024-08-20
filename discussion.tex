@@ -1,0 +1,93 @@
+%!TEX root = main.tex
+\section{Discussion}
+% \paragraph{Distributed Training}
+\setlength{\parindent}{2em}\textbf{\textit{a) Distributed training:}}
+Distributed training is common to speedup the overall training process
+and support massive models, such as GPT-serial models~\cite{radford2019language,brown2020language}.
+It includes data parallelism, model parallelism~\cite{shoeybi2019megatron}, and pipeline model parallelism~\cite{ghuangGpipeEfficientTraining2019,narayanan2019pipedream,eliad2021fine}.
+% But the is much difficult compared to singe-GPU training.
+The distributed training is complicated than single-GPU training
+as it introduces communication and parameters aggregation across GPUs.
+Nonetheless, the memory usage of an iteration inside a single GPU still follows \emph{``first increase then drop"} pattern.
+Therefore, the idea in \oursys{} is still applicable in distributed training.
+% The concurrent training on distributed training ,
+But the selection of jobs to co-locate with distributed training job needs to be more careful,
+since the speed slowdown on one GPU lead to the performance degradation of overall distributed training.
+% one slowdown on a GPU will 
+We leave the extension of \oursys{} to distributed training as a future work.
+
+\textbf{\textit{b) Job priority:}}
+% \paragraph{Job priority}
+There are usually two kinds of jobs in DL GPU cluster: \emph{high-priority job} and \emph{low-priority job}.
+When co-locating jobs with different priorities,
+it's an important and challenging problem to provide performance guarantee on jobs with high-priority.
+AntMan~\cite{xiao2020antman} made an attempt to achieve it through limiting the operator launch rate of low-priority jobs.
+The current scheduling in \oursys{} does not take the job priority into account.
+Nonetheless, it's easy to integrate the batch scheduling policy or operator scheduling policy into \oursys{} to achieve prioritized scheduling,
+since all jobs' batches are submitted to \oursys{} and the operator scheduling can also be achieved via NodeGroup abstract in \oursys{}.
+And it's an interesting topic that how to achieve memory sharing efficiency while guaranteeing the job priority.
+We leave the consideration of job priority and computation time as a future work.
+
+\textbf{\textit{c) Balancing computation in graph partition and scheduling:}}
+% \paragraph{Computation time consideration in graph partition and scheduling}
+In graph partition and scheduling of \oursys{},
+we only consider balancing the memory footprint of each partition without considering the balance of computation.
+In general, when both jobs have high GPU computation demand and can fully utilize the GPU,
+imbalanced computation of node groups will have little impact on performance.
+However, if one of the models has lower computational demands,
+imbalanced computation will degrade the performance to some extent.
+However, a significant challenge in taking the computation demand into account is that
+parallel kernel scheduling in NVIDIA GPU is opaque.
+Therefore, it is difficult to predict whether the kernels in question can be parallelized and assess the performance of parallelized kernels.
+As a result, it is challenging to determine if a particular partition and scheduling policy can achieve higher training throughput.
+Novel methods need to be developed to overcome these difficulties, which is part of our future research plan.
+% A major obstacle to take computation time into account
+% is that the parallel kernels scheduling in NVIDIA GPU is a black box concurrently,
+% which means it's difficult to predict whether the specific kernels can be parallelized executing
+% or the performance of the parallelized kernels.
+% Therefore, it's hard to judge if a specific partition and scheduling policy could
+% achieve the best overall training throughput.
+
+\textbf{\textit{d) Security:}}
+% \paragraph{Security}
+Security is crucial for DL training as this process could last long for months,
+an accident exiting due to unpredictable faults will waste expensive GPU resources.
+When jobs are running in their own CUDA context on the same GPU,
+the fault only affects themselves, not to other jobs.
+However, in order to share the GPU memory resources across jobs,
+they need to run in the same CUDA context,
+which will break the \emph{fault isolation}:
+% one jobs's fault will lead all other co-located jobs exiting accidentally too.
+the failure in a job doesn't impact other co-located jobs.
+This security issue exists in the frameworks that merge numerous jobs' contexts into one,
+such as NVIDIA MPS~\cite{mps}, Salus~\cite{yu2020salus}, and also \oursys{}.
+A good aspect is that DL training job can be recovered at an arbitrary step
+as long as the training state (parameters) at that step has been saved.
+And this recovery is lightweight since the time to run a single training step is small (seconds level).
+But too frequent checkpointing will also influence the overall training performance.
+The users need to balance the frequency of checkpointing to make a tradeoff.
+% Our work's priority purpose is to improve memory sharing efficiency in concurrent training
+% Since share , the concurrent training jobs need to in the same CUDA context
+% One job's fault will lead other co-located jobs fail too.
+On the other side, another method to support concurrent running of multiple jobs
+while guaranteeing fault isolation is virtualizing a GPU to numerous virtualized GPUs (vGPU)~\cite{vGPU}.
+The latest technology is Multi-Instance GPU (MIG)~\cite{mig} which is provided by NVIDIA
+and supported on the NVIDIA Ampere architecture and after (such as A100 and H100 GPU).
+MIG partitions a single GPU into numerous separate GPU instances
+where each one owns the dedicated compute, memory, and memory bandwidth resources.
+But it has limitations for supporting concurrent training.
+First, the compute and memory resource configurations of a GPU instance are pre-defined by NVIDIA that cannot be changed at will.
+Besides, when the GPU instances have been configured, the resources cannot be adjusted flexible on-fly.
+This collides with the diverse and dynamic resources requirement of DL training jobs.
+% The DL training jobs' resource requirements vary much.
+Second, the GPU memory resources are isolated across instances, thus cannot be shared.
+% It's more suitable for AI inference tasks whose .
+% But the optional configurations are limited.
+% The compute and memory resources can not be adjusted flexible when the virtualized has been configured.
+% \paragraph{Memory fragmentation}
+% The next batch of a job won’t start until current batch has finished due to batch dependency.
+% Therefore, all memory will be freed and coalesced to a large chunk naturally
+% when current parallel running batches complete if there are only two jobs.
+% When there are more than two jobs, we flush the pipeline when the parallel running
+% batches of these jobs complete to avoid memory fragmentation.
+% The memory fragmentation in concurrent training is an interesting topic to research.

@@ -1,0 +1,174 @@
+% \documentclass[lettersize,journal]{IEEEtran}
+\documentclass[journal,compsoc]{IEEEtran}
+
+\ifCLASSOPTIONcompsoc
+  % IEEE Computer Society needs nocompress option
+  % requires cite.sty v4.0 or later (November 2003)
+  \usepackage[nocompress]{cite}
+\else
+  % normal IEEE
+  \usepackage{cite}
+\fi
+
+\usepackage{amsmath,amsfonts}
+\usepackage{booktabs}
+\usepackage{textcomp}
+\usepackage{url}
+% \renewcommand\footnotetextcopyrightpermission[1]{}
+% \usepackage{mathptmx} 
+% \usepackage{mathrsfs}
+% \usepackage{fancyvrb}
+
+% \usepackage{wrapfig}
+\usepackage{makecell}
+\usepackage{units}
+\usepackage{amssymb}
+% \usepackage{cite}
+% \usepackage{pifont}
+\usepackage{balance}
+\usepackage{graphicx}
+\usepackage{subfigure}
+% \usepackage{url}
+% \usepackage{color}
+% \usepackage{enumitem}
+% \usepackage{lipsum}
+% \usepackage{textcomp}
+% \usepackage{indentfirst}
+
+\usepackage{hyperref}
+% % \usepackage{subcaption}
+% % \usepackage{caption}
+% % \captionsetup[subfloat]{listofformat=parens}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+% \usepackage{algpseudocode}
+
+\usepackage{multirow}
+\usepackage[normalem]{ulem}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+\graphicspath{{figures/}}
+% \pagestyle{plain}
+% \settopmatter{printfolios=true}
+
+% \def\UrlBreaks{\do\/\do-\do\.}
+
+
+% \usepackage[sort,nocompress]{cite}
+% \newcommand{\comment}[1]{{\color{red} #1}}
+\newcommand{\revise}[1]{{\color{blue} #1}}
+\renewcommand{\rmdefault}{ppl}
+\input{macro}
+
+\begin{document}
+
+% \title{Revision: Flow the GPU Memory in Concurrent Deep Learning Training}
+% \title{Waterwave: Make GPU Memory Flow Efficiently in Concurrent Deep Learning Training}
+\title{DawnPiper: A Memory-scablable Pipeline Parallel Training System}
+% \author{Xuan~Peng,
+%         Xuanhua~Shi,~\IEEEmembership{Senior~Member,~IEEE,}
+%         Ligang~He,
+%         Yunfei~Zhao,
+%         and~Hai~Jin,~\IEEEmembership{Fellow,~IEEE}
+% \IEEEcompsocitemizethanks{\IEEEcompsocthanksitem Xuan Peng, Xuanhua Shi,
+% Yunfei Zhao, and Hai Jin are with the National Engineering Research Center
+% for Big Data Technology and System,
+% Services Computing Technology and System Lab, Huazhong University
+% of Science and Technology, Wuhan, 430074, China.
+% E-mail: \{piecesix, xhshi, yfzhao, hjin\}@hust.edu.cn
+% \IEEEcompsocthanksitem Ligang He is with University of Warwick, UK. E-mail: ligang.he@warwick.ac.uk}
+% \thanks{}}% <-this % stops an unwanted space
+
+\author{Xuanhua~Shi,~\IEEEmembership{Senior~Member,~IEEE,}
+        Xuan~Peng,
+        Haolin~Zhang,
+        and~Hai~Jin,~\IEEEmembership{Fellow,~IEEE}
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem Xuanhua Shi, Xuan Peng, Haolin Zhang,
+and Hai Jin are with the National Engineering Research Center for Big Data Technology and System,
+Services Computing Technology and System Lab, Huazhong University
+of Science and Technology, Wuhan, 430074, China.
+E-mail: \{piecesix, xhshi, xxx, hjin\}@hust.edu.cn}
+\thanks{}}
+
+% <-this % stops an unwanted space
+% \author[$\dagger$]{Xuan Peng}
+% \affil[$\dagger$]{\textit{Huazhong University of Science and Technology}}
+% $\star$
+% $\ast$
+% $\ddagger$
+
+% \date{}
+\IEEEtitleabstractindextext{%
+\input{abstract}
+
+% Note that keywords are not normally used for peerreview papers.
+\begin{IEEEkeywords}
+GPU, Deep learning training, Pipeline parallelism.
+\end{IEEEkeywords}}
+
+\maketitle
+
+% \input{abstract}
+
+% \begin{IEEEkeywords}
+% GPU, Deep learning training, Pipeline parallelism.
+% \end{IEEEkeywords}
+
+% \thispagestyle{empty}
+
+\input{intro}
+
+\input{background}
+
+% \input{observation}
+
+\input{motivation}
+
+\input{design}
+
+\input{imp}
+
+\input{eval}
+
+% \input{discussion}
+
+\input{related}
+%
+
+\input{conclusion}
+%
+\input{ack}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+{\footnotesize 
+\bibliographystyle{IEEEtran}
+\bibliography{./bib/papers}
+}
+
+% \vspace{-1cm}
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{XuanhuaShi-E.jpg}}]{Xuanhua Shi}
+% (Senior Member, IEEE) received the PhD degree in computer engineering from the Huazhong University of Science and Technology, Wuhan, China, in 2005. He is currently a professor with the National Engineering Research Center for Big Data Technology and System Services Computing Technology and System/Services Computing Technology and System Lab, Huazhong University of Science and Technology (China). From 2006, he worked as an INRIA postdoctoral in PARIS team at Rennes for one year. His research interests cloud computing and big data processing. He published over more than 100 peer-reviewed publications, received research support from a variety of governmental and industrial organizations, such as National Science Foundation of China, Ministry of Science and Technology, Ministry of Education, European Union, Alibaba, ByteDance, Intel and so on. He is a senior member of CCF.
+% \end{IEEEbiography}
+% \vspace{-0.8cm}
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{xuan-2inch-E.jpg}}]{Xuan Peng}
+% is currently working toward the PhD degree with the School of Computer Science and Technology, Huazhong University of Science and Technology, Wuhan, China. His research focuses on intelligent computing, memory management for AI systems.
+% \end{IEEEbiography}
+% \vspace{-0.8cm}
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{LigangHe.jpg}}]{Ligang He}
+%   is now a Reader in the Department of Computer Science at the University of Warwick, UK. His research area is mainly parallel and distributed computing. He has published more than 150 papers in the research area.
+% \end{IEEEbiography}
+% \vspace{-0.5cm}
+
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{HaiJin-E.jpg}}]{Hai Jin}
+% (Fellow, IEEE) received the Ph.D. degree in computer engineering from the Huazhong University of Science and Technology in 1994. He received the German Academic Exchange Service Fellowship to visit the Technical University of Chemnitz, Germany, in 1996. He worked at The University of Hong Kong from 1998 to 2000 and as a Visiting Scholar at the University of Southern California from 1999 to 2000. He received the Excellent Youth Award from the National Science Foundation of China in 2001. He is a Cheung Kung Scholars Chair Professor of computer science and engineering of the Huazhong University of Science and Technology. He has coauthored 22 books and published over 800 research articles. His research interests include computer architecture, virtualization technology, cluster computing and cloud computing, peer-to-peer computing, network storage, and network security. He is a fellow of the CCF and a member of the ACM.
+% \end{IEEEbiography}
+
+\end{document}

@@ -1,0 +1,57 @@
+%!TEX root = main.tex
+\section{Related Work}
+\label{sec:related}
+\subsection{Data Parallelism}
+Data parallelism is the most widely used parallel strategy which
+divides the training data into multiple shards and distribute them to different devices.
+As the model parameters and optimizer states gradually
+accounts for a significant portion of the memory in NLP models training,
+Ren et al. proposed the Zero Redundancy Optimizer (ZeRO)~\cite{rajbhandariZeROMemoryOptimizations2020}
+to distribute such memory to store evenly in different devices.
+ZeRO-Offload~\cite{renZerooffloadDemocratizingBillionScale2021} offloads all parameters and computations of the optimizer
+to the CPU and redesigns the CPU optimizer computation method to accelerate this process.
+ZeRO-Infinity~\cite{rajbhandariZeROinfinityBreakingGPU2021} further utilizes the memory optimization of offloading
+the optimizer to the CPU in ZeRO-Offload
+and the memory exchange method of offloading GPU memory to the CPU,
+non-volatile memory (Non-Volatile Memory, NVM),
+and other external storage to expand GPU memory.
+PatrickStar~\cite{fangParallelTrainingPreTrained2022} proposed organizing memory in blocks and
+using it as the communication unit for improving
+the communication bandwidth utilization.
+Generally, the data parallelism is orthogonal to our work
+which can be used for training model in conjunction.
+
+\subsection{Pipeline and Hybrid Parallelism}
+GPipe~\cite{huangGpipeEfficientTraining2019} and PipeDream~\cite{narayananPipeDreamGeneralizedPipeline2019} are the pioneer work of
+the SPP and ASP.
+DAPPLE~\cite{fanDAPPLEPipelinedData2021} introduces the 1F1B computation scheduling into SPP by dividing the batch into
+more micro-batches for the initial warm-up phase of computation scheduling.
+It reduces the pipeline bubbles at the cost that relying on a sufficient number of micro-batches,
+which is not always the case for NLP models.
+Chimera~\cite{liChimeraEfficientlyTraining2021} proposes a bidirectional synchronous pipeline scheduling method,
+which reduces the pipeline bubbles by letting a GPU perform the
+forward and backward computations of two different stages.
+Hanayo~\cite{liuHanayoHarnessingWavelike2023} combines the methods of DAPPLE and Chimera,
+proposing a wave-based computation scheduling method.
+Narayanan et al.~\cite{narayananEfficientLargeScaleLanguage2021} reduce the proportion of pipeline bubbles
+by allowing a stage's GPU to store more model partitions
+based on DAPPLE's computation scheduling, but at the cost of more communications.
+Qi et al.~\cite{qiZeroBubbleAlmost} achieves almost bubble-free pipeline parallelism by
+re-scheduling the backward computation.
+% into two parts:
+% computing gradients for inputs and computing gradients for model parameters,
+% the idea being that there is no computational dependency
+% for the part that computes gradients for model parameters,
+% but to fully achieve no pipeline bubbles will result in more memory occupation.
+BPipe~\cite{kimBPipeMemoryBalancedPipeline2023} balances the GPU memory usage between stages
+by asynchronously exchanging activations between GPUs.
+vPipe~\cite{zhaoVPipeVirtualizedAcceleration2022} proposes an iterative algorithm to dynamically find a balance between
+model partitioning, memory swapping, and recomputation,
+using the Kernighan-Lin algorithm~\cite{kernighanEfficientHeuristicProcedure1970}.
+AdaPipe~\cite{sunAdaPipeOptimizingPipeline2024} proposes a two-step dynamic programming pipeline partition
+and recomputation algorithm for SPP.
+The pipeline parallelism is usually adopted in conjunction with tensor parallelism,
+such as Flexflow~\cite{jiaDataModelParallelism2019} and Alpa~\cite{zhengAlpaAutomatingInter2022}, which is called as \emph{hybrid parallelism}.
+We leave the extension for hybrid parallelism of DawnPiper to the future work.
+
+% \subsection{Memory Optimization in Training}

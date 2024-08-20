@@ -1,0 +1,127 @@
+%!TEX root = main.tex
+\section{Discussion}
+\subsection{Inference}
+\paragraph{Characteristics.}
+\begin{itemize}
+  \item It's latency-sensitive, but the latency-bounded throughput is more representative as it 
+  determines the number of items that can be ranked given service level agreement (SLA) requirements~\cite{gupta2020architectural}.
+  \item It's usually done by CPU~\cite{park2018deep}. Leveraging GPU is also a common practice~\cite{bai2020pipeswitch}.
+  \item The inference models are usually static, which can be optimized statically.
+  \item Balancing throughput with strict latency requirements is accomplished by batching queries and co-locating inferences on the same machine.~\TODO{
+    any previous works that study the batching strategies or co-locating strategies?}
+  \item Inference latency varies by 15× across production-scale recommendation models.~\TODO{what about other fields models}.
+  \item Group/depth-wise convolutions are memory bandwidth bound (such as in ResNeXt~\cite{xie2017aggregated} and ShuffleNet), while majority of FLOPs spent elsewhere.~\footnote{
+    This also exists in training.}
+  \item batching independent inference tasks initiated by each application and scheduling batches to run in a time-sharing manner~\cite{zhang2020dybatch}.
+\end{itemize}
+
+\paragraph{Current works.}
+\begin{itemize}
+  \item Nimble~\cite{kwon2020nimble}
+  \begin{itemize}
+    \item Ahead-of-time (AOT) scheduling.
+    \item Automatic multi-stream execution.
+  \end{itemize}
+  \item Merge same type operation
+  \begin{itemize}
+    \item same inputs, same weights: the result can be shared, e.g., MCDNN, Mainstream
+    \item diff inputs, same weights: Clipper, PRETZEL
+    \item same inputs, diff weights: HiveMind~\cite{narayanan2018accelerating}
+    \item diff inputs, diff weights: NETFUSE~\cite{jeong2020accelerating}
+  \end{itemize}
+  \item Merge any type operation
+  \begin{itemize}
+    \item Rammer~\cite{ma2020rammer}: use \emph{rTask} to describe operation in a finer granularity (\emph{thread block} in GPU)
+    \item Tensorflow XLA, AutoTVM, etc.
+  \end{itemize}
+  \item PipeSwitch~\cite{bai2020pipeswitch}
+  \begin{itemize}
+    \item pipelined model transmission: optimal model-aware grouping (layer-wise pipeline: too many PCI-e data transfer invoking)
+    \item process-level isolation with unified GPU memory management (implemented via \texttt{cudaIpcOpenMemHandle} in Nvidia GPU, an expensive API call)
+  \end{itemize}
+  \item DyBatch~\cite{zhang2020dybatch}: scheduling problem when time-sharing devices, Pareto efficiency and fairness
+\end{itemize}
+\paragraph{Current works - summarized}
+\begin{itemize}
+  \item scheduling
+  \begin{itemize}
+    \item rTask (thread block in GPU) scheduling
+    \item operator-level scheduling: ahead-of-time scheduling; multi-stream execution
+    \item task-level scheduling: Pareto efficiency and fairness
+  \end{itemize}
+  \item operator fusing
+  \begin{itemize}
+    \item same type operation
+    \item diff type operation
+  \end{itemize}
+  \item hide overhead of startup phase: data transfer and device initialization
+  \item memory management: process-level isolation with unified memory management (avoid the overhead of cudaMalloc)
+\end{itemize}
+\paragraph{Problems when co-locating multiple inferences instances together}
+\begin{itemize}
+  \item Given the Qos budget, how to schedule as much and big jobs as possible.
+  \begin{itemize}
+    \item startup phase: 
+    \begin{itemize}
+      \item \textit{device initialization}: current work uses multiple (two) standby workers which are initiated with a separate CUDA context
+      \item \textit{parameter transfer}: current work uses grouped layers transfer to overlap computation and data transfer
+    \end{itemize}
+    \item computation: 
+    \begin{itemize}
+      \item CPU part: remained question
+      \item schedule goal
+      \item NOTE: if use \emph{rTask} to schedule, then the problem is equal to a scheduling algorithm (also need to be in the same CUDA context)
+    \end{itemize}
+    \item memory: how to guarantee process-level isolation
+  \end{itemize}
+\end{itemize}
+\paragraph{Possible Research Projects.}
+\begin{itemize}
+  \item Given the Qos budget, how to schedule multiple inference tasks
+  \begin{itemize}
+    \item a scheduling problem: operator-level scheduling strategy 
+  \end{itemize}
+\end{itemize}
+
+\subsection{Training}
+\paragraph{Characteristics.}
+\begin{itemize}
+  \item Dynamics (partial):
+  \begin{itemize}
+    \item model architecture
+    \item memory footprint intra-minibatch and inter-minibatch
+    \item dynamic arrival of a new job, means totally static optimization is not working (profile first?)
+  \end{itemize}
+  \item Huger model size and training efficiency => distributed training
+  \begin{itemize}
+    \item Data parallel: 
+    \item Model parallel
+    \item Pipeline model parallel
+  \end{itemize}
+  \item accuracy is not sensitive to precision, batch size
+  \item target is not finishing one job, but reach a target accuracy (need finish a series of jobs or automl)
+\end{itemize}
+\paragraph{Current works - summarized}
+\begin{itemize}
+  \item scheduling
+  \begin{itemize}
+    \item Gandiva
+    \item AntMan
+    \item Salus
+    \item Cerebro
+  \end{itemize}
+  \item memory management
+  \item compiling
+\end{itemize}
+\paragraph{Problems when co-locating multiple training instances together}
+\begin{enumerate}
+  \item Computation scheduling
+  \begin{itemize}
+    \item minimize the total memory footprint
+    \item negligible scheduling overhead: this point is tightly related to the scheduling algorithm
+    \item guarantee computation priority: also may restrict the scheduling strategy
+    \item \textit{A job's} computation to fill \textit{B job's} communication (including data parallel, pipeline model parallel)
+  \end{itemize}
+  \item Dynamic neural networks (dynamic memory allocation pattern): this means we can't generate a static memory allocation strategy through profiling first.
+\end{enumerate}
+\paragraph{Problems when co-locating training and inferences mix jobs together}

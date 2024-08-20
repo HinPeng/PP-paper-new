@@ -1,0 +1,580 @@
+@inproceedings{kimBPipeMemoryBalancedPipeline2023,
+  title = {{{BPipe}}: {{Memory-Balanced Pipeline Parallelism}} for {{Training Large Language Models}}},
+  shorttitle = {{{BPipe}}},
+  booktitle = {Proceedings of the 40th {{International Conference}} on {{Machine Learning}} ({{ICML}} 2023)},
+  author = {Kim, Taebum and Kim, Hyoungjoo and Yu, Gyeong-In and Chun, Byung-Gon},
+  year = {2023},
+  pages = {16639--16653},
+  publisher = {PMLR},
+  address = {Honolulu, HI, USA, 23-29 Jul. 2023},
+  issn = {2640-3498},
+  urldate = {2024-03-31},
+  abstract = {Pipeline parallelism is a key technique for training large language models within GPU clusters. However, it often leads to a memory imbalance problem, where certain GPUs face high memory pressure while others underutilize their capacity. This imbalance results in suboptimal training performance, even when the overall GPU memory capacity is sufficient for more efficient setups. To address this inefficiency, we propose BPipe, a novel approach for achieving memory balance in pipeline parallelism. BPipe employs an activation balancing method to transfer intermediate activations between GPUs during training, enabling all GPUs to utilize comparable amounts of memory. With balanced memory utilization, BPipe enhances the training efficiency of large language models like GPT-3 by eliminating redundant recomputations or increasing the micro-batch size. Our evaluation conducted on 48 A100 GPUs across six nodes interconnected with HDR InfiniBand shows that BPipe accelerates the training of GPT-3 96B and GPT-3 134B models by 1.25x-2.17x compared to Megatron-LM, a state-of-the-art framework for training large language models.}
+}
+
+@inproceedings{narayananPipeDreamGeneralizedPipeline2019,
+  title = {{{PipeDream}}: {{Generalized Pipeline Parallelism}} for {{DNN Training}}},
+  shorttitle = {{{PipeDream}}},
+  booktitle = {Proceedings of the 27th {{ACM Symposium}} on {{Operating Systems Principles}} ({{SOSP}} 2019)},
+  author = {Narayanan, Deepak and Harlap, Aaron and Phanishayee, Amar and Seshadri, Vivek and Devanur, Nikhil R. and Ganger, Gregory R. and Gibbons, Phillip B. and Zaharia, Matei},
+  year = {2019},
+  month = oct,
+  series = {{{SOSP}} '19},
+  pages = {1--15},
+  publisher = {ACM},
+  address = {Huntsville, Ontario, Canada, 27-30 Oct. 2019},
+  doi = {10.1145/3341301.3359646},
+  urldate = {2024-03-31},
+  abstract = {DNN training is extremely time-consuming, necessitating efficient multi-accelerator parallelization. Current approaches to parallelizing training primarily use intra-batch parallelization, where a single iteration of training is split over the available workers, but suffer from diminishing returns at higher worker counts. We present PipeDream, a system that adds inter-batch pipelining to intra-batch parallelism to further improve parallel training throughput, helping to better overlap computation with communication and reduce the amount of communication when possible. Unlike traditional pipelining, DNN training is bi-directional, where a forward pass through the computation graph is followed by a backward pass that uses state and intermediate data computed during the forward pass. Na{\"i}ve pipelining can thus result in mismatches in state versions used in the forward and backward passes, or excessive pipeline flushes and lower hardware efficiency. To address these challenges, PipeDream versions model parameters for numerically correct gradient computations, and schedules forward and backward passes of different minibatches concurrently on different workers with minimal pipeline stalls. PipeDream also automatically partitions DNN layers among workers to balance work and minimize communication. Extensive experimentation with a range of DNN tasks, models, and hardware configurations shows that PipeDream trains models to high accuracy up to 5.3X faster than commonly used intra-batch parallelism techniques.},
+  isbn = {978-1-4503-6873-5}
+}
+
+@article{zhaoVPipeVirtualizedAcceleration2022,
+  title = {{{vPipe}}: {{A Virtualized Acceleration System}} for {{Achieving Efficient}} and {{Scalable Pipeline Parallel DNN Training}}},
+  shorttitle = {{{vPipe}}},
+  author = {Zhao, Shixiong and Li, Fanxin and Chen, Xusheng and Guan, Xiuxian and Jiang, Jianyu and Huang, Dong and Qing, Yuhao and Wang, Sen and Wang, Peng and Zhang, Gong and Li, Cheng and Luo, Ping and Cui, Heming},
+  year = {2022},
+  month = mar,
+  journal = {IEEE Transactions on Parallel and Distributed Systems},
+  volume = {33},
+  number = {3},
+  pages = {489--506},
+  issn = {1558-2183},
+  doi = {10.1109/TPDS.2021.3094364},
+  abstract = {The increasing computational complexity of DNNs achieved unprecedented successes in various areas such as machine vision and natural language processing (NLP), e.g., the recent advanced Transformer has billions of parameters. However, as large-scale DNNs significantly exceed GPU's physical memory limit, they cannot be trained by conventional methods such as data parallelism. Pipeline parallelism that partitions a large DNN into small subnets and trains them on different GPUs is a plausible solution. Unfortunately, the layer partitioning and memory management in existing pipeline parallel systems are fixed during training, making them easily impeded by out-of-memory errors and the GPU under-utilization. These drawbacks amplify when performing neural architecture search (NAS) such as the evolved Transformer, where different network architectures of Transformer needed to be trained repeatedly. vPipe is the first system that transparently provides dynamic layer partitioning and memory management for pipeline parallelism. vPipe has two unique contributions, including (1) an online algorithm for searching a near-optimal layer partitioning and memory management plan, and (2) a live layer migration protocol for re-balancing the layer distribution across a training pipeline. vPipe improved the training throughput of two notable baselines (Pipedream and GPipe) by 61.4-463.4 percent and 24.8-291.3 percent on various large DNNs and training settings.},
+  keywords = {distributed artificial intelligence,distributed systems,Graphics processing units,Machine learning,memory management,Memory management,Parallel processing,parallel systems,pipeline,Pipelines,Tensors,Throughput,Training}
+}
+
+@inproceedings{renSentinelEfficientTensor2021,
+  title = {Sentinel: {{Efficient Tensor Migration}} and {{Allocation}} on {{Heterogeneous Memory Systems}} for {{Deep Learning}}},
+  shorttitle = {Sentinel},
+  booktitle = {Proceedings of the 27th {{IEEE International Symposium}} on {{High-Performance Computer Architecture}} ({{HPCA}} 2021)},
+  author = {Ren, Jie and Luo, Jiaolin and Wu, Kai and Zhang, Minjia and Jeon, Hyeran and Li, Dong},
+  year = {2021},
+  month = feb,
+  pages = {598--611},
+  publisher = {IEEE},
+  address = {Seoul, South Korea, 27 Feb. - 3 Mar. 2021},
+  issn = {2378-203X},
+  doi = {10.1109/HPCA51647.2021.00057},
+  abstract = {Memory capacity is a major bottleneck for training deep neural networks (DNN). Heterogeneous memory (HM) combining fast and slow memories provides a promising direction to increase memory capacity. However, HM imposes challenges on tensor migration and allocation for high performance DNN training. Prior work heavily relies on DNN domain knowledge, unnecessarily causes tensor migration due to page-level false sharing, and wastes fast memory space. We present Sentinel, a software runtime system that automatically optimizes tensor management on HM. Sentinel uses dynamic profiling, and coordinates operating system (OS) and runtime-level profiling to bridge the semantic gap between OS and applications, which enables tensor-level profiling. This profiling enables co-allocating tensors with similar lifetime and memory access frequency into the same pages. Such fine-grained profiling and tensor collocation avoids unnecessary data movement, improves tensor movement efficiency, and enables larger batch training because of saving in fast memory space. Sentinel reduces fast memory consumption by 80\% while retaining comparable performance to fast memory-only system; Sentinel consistently outperforms a state-of-the-art solution on CPU by 37\% and two state-of-the-art solutions on GPU by 2x and 21\% respectively in training throughput.},
+  keywords = {deep neural network training,heterogeneous memory,memory management,Memory management,Neural networks,Operating systems,Runtime,Semantics,Tensors,Training}
+}
+
+@inproceedings{rajbhandariZeROinfinityBreakingGPU2021,
+  title = {{{ZeRO-Infinity}}: {{Breaking}} the {{GPU Memory Wall}} for {{Extreme Scale Deep Learning}}},
+  shorttitle = {{{ZeRO-infinity}}},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2021)},
+  author = {Rajbhandari, Samyam and Ruwase, Olatunji and Rasley, Jeff and Smith, Shaden and He, Yuxiong},
+  year = {2021},
+  month = nov,
+  pages = {1--14},
+  publisher = {ACM},
+  address = {St. Louis, Missouri, USA, 14-19 Nov. 2021},
+  doi = {10.1145/3458817.3476205},
+  urldate = {2022-06-25},
+  abstract = {In the last three years, the largest dense deep learning models have grown over 1000x to reach hundreds of billions of parameters, while the GPU memory has only grown by 5x (16 GB to 80 GB). Therefore, the growth in model scale has been supported primarily though system innovations that allow large models to fit in the aggregate GPU memory of multiple GPUs. However, we are getting close to the GPU memory wall. It requires 800 NVIDIA V100 GPUs just to fit a trillion parameter model for training, and such clusters are simply out of reach for most data scientists. In addition, training models at that scale requires complex combinations of parallelism techniques that puts a big burden on the data scientists to refactor their model.},
+  isbn = {978-1-4503-8442-1}
+}
+
+@inproceedings{rajbhandariZeROMemoryOptimizations2020,
+  title = {{{ZeRO}}: {{Memory Optimizations Toward Training Trillion Parameter Models}}},
+  shorttitle = {{{ZeRO}}},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2020)},
+  author = {Rajbhandari, Samyam and Rasley, Jeff and Ruwase, Olatunji and He, Yuxiong},
+  year = {2020},
+  pages = {1--16},
+  publisher = {IEEE},
+  address = {Atlanta, GA, USA, 9-19 Nov. 2020},
+  doi = {10.1109/SC41405.2020.00024},
+  urldate = {2022-06-25},
+  abstract = {Large deep learning models offer significant accuracy gains, but training billions to trillions of parameters is challenging. Existing solutions such as data and model parallelisms exhibit fundamental limitations to fit these models into limited device memory, while obtaining computation, communication and development efficiency. We develop a novel solution, Zero Redundancy Optimizer (ZeRO), to optimize memory, vastly improving training speed while increasing the model size that can be efficiently trained. ZeRO eliminates memory redundancies in data- and model-parallel training while retaining low communication volume and high computational granularity, allowing us to scale the model size proportional to the number of devices with sustained high efficiency. Our analysis on memory requirements and communication volume demonstrates: ZeRO has the potential to scale beyond 1 Trillion parameters using today's hardware.},
+  isbn = {978-1-72819-998-6}
+}
+
+@inproceedings{sunAdaPipeOptimizingPipeline2024,
+  title = {{{AdaPipe}}: {{Optimizing Pipeline Parallelism}} with {{Adaptive Recomputation}} and {{Partitioning}}},
+  shorttitle = {{{AdaPipe}}},
+  booktitle = {Proceedings of the 29th {{ACM International Conference}} on {{Architectural Support}} for {{Programming Languages}} and {{Operating Systems}} ({{ASPLOS}} 2024)},
+  author = {Sun, Zhenbo and Cao, Huanqi and Wang, Yuanwei and Feng, Guanyu and Chen, Shengqi and Wang, Haojie and Chen, Wenguang},
+  year = {2024},
+  pages = {86--100},
+  publisher = {ACM},
+  address = {La Jolla, CA, USA, 27 Apr. - 1 May 2024},
+  doi = {10.1145/3620666.3651359},
+  urldate = {2024-05-04},
+  isbn = {9798400703867}
+}
+
+@inproceedings{liChimeraEfficientlyTraining2021,
+  title = {Chimera: {{Efficiently Training Large-Scale Neural Networks}} with {{Bidirectional Pipelines}}},
+  shorttitle = {Chimera},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2021)},
+  author = {Li, Shigang and Hoefler, Torsten},
+  year = {2021},
+  pages = {1--14},
+  publisher = {ACM},
+  address = {St. Louis, Missouri, USA, 14-19 Nov. 2021},
+  doi = {10.1145/3458817.3476145},
+  urldate = {2024-05-04},
+  isbn = {978-1-4503-8442-1}
+}
+
+@inproceedings{liuHanayoHarnessingWavelike2023,
+  title = {Hanayo: {{Harnessing Wave-like Pipeline Parallelism}} for {{Enhanced Large Model Training Efficiency}}},
+  shorttitle = {Hanayo},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2023)},
+  author = {Liu, Ziming and Cheng, Shenggan and Zhou, Haotian and You, Yang},
+  year = {2023},
+  pages = {1--13},
+  publisher = {ACM},
+  address = {Denver, CO, USA, 12-17 Nov. 2023},
+  doi = {10.1145/3581784.3607073},
+  urldate = {2024-05-04},
+  isbn = {9798400701092}
+}
+
+@inproceedings{wolf2020transformers,
+  title={Transformers: State-of-the-art natural language processing},
+  author={Wolf, Thomas and Debut, Lysandre and Sanh, Victor and Chaumond, Julien and Delangue, Clement and Moi, Anthony and Cistac, Pierric and Rault, Tim and Louf, R{\'e}mi and Funtowicz, Morgan and others},
+  booktitle={Proceedings of the 2020 conference on empirical methods in natural language processing: system demonstrations},
+  pages={38--45},
+  year={2020}
+}
+
+@article{dubey2024llama,
+  title={The llama 3 herd of models},
+  author={Dubey, Abhimanyu and Jauhri, Abhinav and Pandey, Abhinav and Kadian, Abhishek and Al-Dahle, Ahmad and Letman, Aiesha and Mathur, Akhil and Schelten, Alan and Yang, Amy and Fan, Angela and others},
+  journal={arXiv preprint arXiv:2407.21783},
+  year={2024}
+}
+
+@article{achiam2023gpt,
+  title={Gpt-4 technical report},
+  author={Achiam, Josh and Adler, Steven and Agarwal, Sandhini and Ahmad, Lama and Akkaya, Ilge and Aleman, Florencia Leoni and Almeida, Diogo and Altenschmidt, Janko and Altman, Sam and Anadkat, Shyamal and others},
+  journal={arXiv preprint arXiv:2303.08774},
+  year={2023}
+}
+
+@article{brownLanguageModelsAre2020,
+  title = {Language Models Are Few-Shot Learners},
+  author = {Brown, Tom and Mann, Benjamin and Ryder, Nick and Subbiah, Melanie and Kaplan, Jared D. and Dhariwal, Prafulla and Neelakantan, Arvind and Shyam, Pranav and Sastry, Girish and Askell, Amanda},
+  year = {2020},
+  journal = {Advances in neural information processing systems},
+  volume = {33},
+  pages = {1877--1901},
+  urldate = {2024-05-07}
+}
+
+@inproceedings{huangGpipeEfficientTraining2019,
+  title = {{{GPipe}}: {{Efficient Training}} of {{Giant Neural Networks}} Using {{Pipeline Parallelism}}},
+  shorttitle = {Gpipe},
+  booktitle = {Proceedings of the 33rd {{International Conference}} on {{Neural Information Processing Systems}} ({{NeurIPS}} 2019)},
+  author = {Huang, Yanping and Cheng, Youlong and Bapna, Ankur and Firat, Orhan and Chen, Dehao and Chen, Mia and Lee, HyoukJoong and Ngiam, Jiquan and Le, Quoc V. and Wu, Yonghui},
+  year = {2019},
+  pages = {103--112},
+  publisher = {Curran Associates, Inc.},
+  address = {Vancouver, BC, Canada, 8-14 Dec. 2019},
+  urldate = {2024-05-08}
+}
+
+@inproceedings{fanDAPPLEPipelinedData2021,
+  title = {{{DAPPLE}}: {{A Pipelined Data Parallel Approach}} for {{Training Large Models}}},
+  shorttitle = {{{DAPPLE}}},
+  booktitle = {Proceedings of the 26th {{ACM SIGPLAN Symposium}} on {{Principles}} and {{Practice}} of {{Parallel Programming}} ({{PPoPP}} 2021)},
+  author = {Fan, Shiqing and Rong, Yi and Meng, Chen and Cao, Zongyan and Wang, Siyu and Zheng, Zhen and Wu, Chuan and Long, Guoping and Yang, Jun and Xia, Lixue and Diao, Lansong and Liu, Xiaoyong and Lin, Wei},
+  year = {2021},
+  month = feb,
+  pages = {431--445},
+  publisher = {ACM},
+  address = {Virtual Event, Republic of Korea, 27 Feb. 2021},
+  doi = {10.1145/3437801.3441593},
+  urldate = {2024-05-09},
+  isbn = {978-1-4503-8294-6}
+}
+
+@inproceedings{rhuVDNNVirtualizedDeep2016,
+  title = {{{vDNN}}: {{Virtualized Deep Neural Networks}} for {{Scalable}}, {{Memory-Efficient Neural Network Design}}},
+  shorttitle = {{{vDNN}}},
+  booktitle = {Proceedings of the 49th {{Annual IEEE}}/{{ACM International Symposium}} on {{Microarchitecture}} ({{MICRO}} 2016)},
+  author = {Rhu, Minsoo and Gimelshein, Natalia and Clemons, Jason and Zulfiqar, Arslan and Keckler, Stephen W.},
+  year = {2016},
+  pages = {1--13},
+  publisher = {IEEE},
+  address = {Taipei, Taiwan, China, 15-19 Oct. 2016},
+  urldate = {2024-05-09}
+}
+
+@inproceedings{wangSuperneuronsDynamicGPU2018,
+  title = {Superneurons: {{Dynamic GPU Memory Management}} for {{Training Deep Neural Networks}}},
+  shorttitle = {Superneurons},
+  booktitle = {Proceedings of the 23rd {{ACM SIGPLAN Symposium}} on {{Principles}} and {{Practice}} of {{Parallel Programming}} ({{PPoPP}} 2018)},
+  author = {Wang, Linnan and Ye, Jinmian and Zhao, Yiyang and Wu, Wei and Li, Ang and Song, Shuaiwen Leon and Xu, Zenglin and Kraska, Tim},
+  year = {2018},
+  month = feb,
+  pages = {41--53},
+  publisher = {ACM},
+  address = {Vienna, Austria, 24-28 Feb. 2018},
+  doi = {10.1145/3178487.3178491},
+  urldate = {2024-05-09},
+  isbn = {978-1-4503-4982-6}
+}
+
+@inproceedings{devlinBERTPretrainingDeep2019,
+  title = {{{BERT}}: {{Pre-training}} of {{Deep Bidirectional Transformers}} for {{Language Understanding}}},
+  shorttitle = {{{BERT}}},
+  booktitle = {Proceedings of the 17th {{Annual Conference}} of the {{North American Chapter}} of the {{Association}} for {{Computational Linguistics}}: {{Human Language Technologies}} ({{NAACL-HLT}} 2019)},
+  author = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and Toutanova, Kristina},
+  year = {2019},
+  pages = {4171--4186},
+  publisher = {ACL},
+  address = {Minneapolis, Minnesota, USA, 2-7 Jun. 2019},
+  abstract = {We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5\% (7.7\% point absolute improvement), MultiNLI accuracy to 86.7\% (4.6\% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).},
+  keywords = {Computer Science - Computation and Language}
+}
+
+@inproceedings{dengImagenetLargeScaleHierarchical2009,
+  title = {Imagenet: {{A Large-Scale Hierarchical Image Database}}},
+  shorttitle = {Imagenet},
+  booktitle = {Proceedings of the {{IEEE Conference}} on {{Computer Vision}} and {{Pattern Recognition}} ({{CVPR}} 2009)},
+  author = {Deng, Jia and Dong, Wei and Socher, Richard and Li, Li-Jia and Li, Kai and {Fei-Fei}, Li},
+  year = {2009},
+  pages = {248--255},
+  publisher = {IEEE},
+  address = {Miami, FL, USA, 20-25 Jun. 2009},
+  urldate = {2024-05-15}
+}
+
+@article{kernighanEfficientHeuristicProcedure1970,
+  title = {An {{Efficient Heuristic Procedure}} for {{Partitioning Graphs}}},
+  author = {Kernighan, Brian W. and Lin, Shen},
+  year = {1970},
+  journal = {The Bell System Technical Journal},
+  volume = {49},
+  number = {2},
+  pages = {291--307},
+  publisher = {Nokia Bell Labs},
+  urldate = {2024-05-28}
+}
+
+@article{shen2019lingvo,
+  title={Lingvo: a modular and scalable framework for sequence-to-sequence modeling},
+  author={Shen, Jonathan and Nguyen, Patrick and Wu, Yonghui and Chen, Zhifeng and Chen, Mia X and Jia, Ye and Kannan, Anjuli and Sainath, Tara and Cao, Yuan and Chiu, Chung-Cheng and others},
+  journal={arXiv preprint arXiv:1902.08295},
+  year={2019}
+}
+
+@article{jinLayerCentricMemoryReuse2018,
+  title = {Layer-{{Centric Memory Reuse}} and {{Data Migration}} for {{Extreme-Scale Deep Learning}} on {{Many-Core Architectures}}},
+  author = {Jin, Hai and Liu, Bo and Jiang, Wenbin and Ma, Yang and Shi, Xuanhua and He, Bingsheng and Zhao, Shaofeng},
+  year = {2018},
+  month = sep,
+  journal = {ACM Transactions on Architecture and Code Optimization},
+  volume = {15},
+  number = {3},
+  pages = {1--26},
+  issn = {1544-3566, 1544-3973},
+  doi = {10.1145/3243904},
+  urldate = {2024-06-06},
+  abstract = {Due to the popularity of Deep Neural Network (DNN) models, we have witnessed extreme-scale DNN models with the continued increase of the scale in terms of depth and width. However, the extremely high memory requirements for them make it difficult to run the training processes on single many-core architectures such as a Graphic Processing Unit (GPU), which compels researchers to use model parallelism over multiple GPUs to make it work. However, model parallelism always brings very heavy additional overhead. Therefore, running an extreme-scale model in a single GPU is urgently required. There still exist several challenges to reduce the memory footprint for extreme-scale deep learning. To address this tough problem, we first identify the memory usage characteristics for deep and wide convolutional networks, and demonstrate the opportunities for memory reuse at both the intra-layer and inter-layer levels. We then present Layrub, a runtime data placement strategy that orchestrates the execution of the training process. It achieves layer-centric reuse to reduce memory consumption for extreme-scale deep learning that could not previously be run on a single GPU. Experiments show that, compared to the original Caffe, Layrub can cut down the memory usage rate by an average of 58.2\% and by up to 98.9\%, at the moderate cost of 24.1\% higher training execution time on average. Results also show that Layrub outperforms some popular deep learning systems such as GeePS, vDNN, MXNet, and Tensorflow. More importantly, Layrub can tackle extreme-scale deep learning tasks. For example, it makes an extra-deep ResNet with 1,517 layers that can be trained successfully in one GPU with 12GB memory, while other existing deep learning systems cannot.}
+}
+
+@article{fangParallelTrainingPreTrained2022,
+  title = {Parallel {{Training}} of {{Pre-Trained Models}} via {{Chunk-Based Dynamic Memory Management}}},
+  author = {Fang, Jiarui and Zhu, Zilin and Li, Shenggui and Su, Hui and Yu, Yang and Zhou, Jie and You, Yang},
+  year = {2022},
+  journal = {IEEE Transactions on Parallel and Distributed Systems},
+  volume = {34},
+  number = {1},
+  pages = {304--315},
+  publisher = {IEEE},
+  urldate = {2024-06-07},
+  abstract = {The pre-trained model (PTM) is revolutionizing Artificial Intelligence (AI) technology. However, the hardware requirement of PTM training is prohibitively high, making it a game for a small proportion of people. Therefore, we proposed PatrickStar system to lower the hardware requirements of PTMs and make them accessible to everyone. PatrickStar uses the CPU-GPU heterogeneous memory space to store the model data. Different from existing works, we organize the model data in memory chunks and dynamically distribute them in the heterogeneous memory. Guided by the runtime memory statistics collected in a warm-up iteration, chunks are orchestrated efficiently in heterogeneous memory and generate lower CPU-GPU data transmission volume and higher bandwidth utilization. Symbiosis with the Zero Redundancy Optimizer, PatrickStar scales to multiple GPUs on multiple nodes. The system can train tasks on bigger models and larger batch sizes, which cannot be accomplished by existing works. Experimental results show that PatrickStar extends model scales 2.27 and 2.5 times of DeepSpeed, and exhibits significantly higher execution speed. PatricStar also successfully runs the 175B GPT3 training task on a 32 GPU cluster. Our code is available at https://github.com/Tencent/PatrickStar .}
+}
+
+@inproceedings{huangSwapAdvisorPushingDeep2020,
+  title = {{{SwapAdvisor}}: {{Pushing Deep Learning Beyond}} the {{GPU Memory Limit}} via {{Smart Swapping}}},
+  shorttitle = {{{SwapAdvisor}}},
+  booktitle = {Proceedings of the 25th {{International Conference}} on {{Architectural Support}} for {{Programming Languages}} and {{Operating Systems}} ({{ASPLOS}} 2020)},
+  author = {Huang, Chien-Chin and Jin, Gu and Li, Jinyang},
+  year = {2020},
+  month = mar,
+  pages = {1341--1355},
+  publisher = {ACM},
+  address = {Lausanne, Switzerland, 16-20 Mar. 2020},
+  doi = {10.1145/3373376.3378530},
+  urldate = {2024-06-07},
+  isbn = {978-1-4503-7102-5}
+}
+
+@inproceedings{narayananEfficientLargeScaleLanguage2021,
+  title = {Efficient {{Large-Scale Language Model Training}} on {{GPU Clusters Using Megatron-LM}}},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2021)},
+  author = {Narayanan, Deepak and Shoeybi, Mohammad and Casper, Jared and LeGresley, Patrick and Patwary, Mostofa and Korthikanti, Vijay and Vainbrand, Dmitri and Kashinkunti, Prethvi and Bernauer, Julie and Catanzaro, Bryan and Phanishayee, Amar and Zaharia, Matei},
+  year = {2021},
+  pages = {1--15},
+  publisher = {ACM},
+  address = {St. Louis, Missouri, USA, 14-19 Nov. 2021},
+  doi = {10.1145/3458817.3476209},
+  urldate = {2024-06-07},
+  isbn = {978-1-4503-8442-1}
+}
+
+@misc{smithUsingDeepSpeedMegatron2022,
+  title = {Using {{DeepSpeed}} and {{Megatron}} to {{Train Megatron-Turing NLG 530B}}, {{A Large-Scale Generative Language Model}}},
+  author = {Smith, Shaden and Patwary, Mostofa and Norick, Brandon and LeGresley, Patrick and Rajbhandari, Samyam and Casper, Jared and Liu, Zhun and Prabhumoye, Shrimai and Zerveas, George and Korthikanti, Vijay and Zhang, Elton and Child, Rewon and Aminabadi, Reza Yazdani and Bernauer, Julie and Song, Xia and Shoeybi, Mohammad and He, Yuxiong and Houston, Michael and Tiwary, Saurabh and Catanzaro, Bryan},
+  year = {2022},
+  month = feb,
+  number = {arXiv:2201.11990},
+  eprint = {2201.11990},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-06-07},
+  abstract = {Pretrained general-purpose language models can achieve state-of-the-art accuracies in various natural language processing domains by adapting to downstream tasks via zero-shot, few-shot and fine-tuning techniques. Because of their success, the size of these models has increased rapidly, requiring high-performance hardware, software, and algorithmic techniques to enable training such large models. As the result of a joint effort between Microsoft and NVIDIA, we present details on the training of the largest monolithic transformer based language model, Megatron-Turing NLG 530B (MT-NLG), with 530 billion parameters. In this paper, we first focus on the infrastructure as well as the 3D parallelism methodology used to train this model using DeepSpeed and Megatron. Next, we detail the training process, the design of our training corpus, and our data curation techniques, which we believe is a key ingredient to the success of the model. Finally, we discuss various evaluation results, as well as other interesting observations and new properties exhibited by MT-NLG. We demonstrate that MT-NLG achieves superior zero-, one-, and few-shot learning accuracies on several NLP benchmarks and establishes new state-of-the-art results. We believe that our contributions will help further the development of large-scale training infrastructures, large-scale language models, and natural language generations.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Computation and Language}
+}
+
+@inproceedings{renZerooffloadDemocratizingBillionScale2021,
+  title = {Zero-Offload: {{Democratizing Billion-Scale Model Training}}},
+  shorttitle = {Zero-Offload},
+  booktitle = {Proceedings of the 2021 {{USENIX Annual Technical Conference}} ({{ATC}} 2021)},
+  author = {Ren, Jie and Rajbhandari, Samyam and Aminabadi, Reza Yazdani and Ruwase, Olatunji and Yang, Shuangyan and Zhang, Minjia and Li, Dong and He, Yuxiong},
+  year = {2021},
+  pages = {551--564},
+  publisher = {USENIX Association},
+  address = {Virtual Event, 14-16 Jul. 2021},
+  urldate = {2024-06-17}
+}
+
+@inproceedings{zhengAlpaAutomatingInter2022,
+  title = {Alpa: {{Automating Inter-}} and {{Intra-Operator Parallelism}} for {{Distributed Deep Learning}}},
+  shorttitle = {Alpa},
+  booktitle = {Proceedings of the 16th {{USENIX Conference}} on {{Operating Systems Design}} and {{Implementation}} ({{OSDI}} 2022)},
+  author = {Zheng, Lianmin and Li, Zhuohan and Zhang, Hao and Zhuang, Yonghao and Chen, Zhifeng and Huang, Yanping and Wang, Yida and Xu, Yuanzhong and Zhuo, Danyang and Xing, Eric P.},
+  year = {2022},
+  pages = {559--578},
+  publisher = {USENIX Association},
+  address = {Carlsbad, CA, USA, 11-13 Jul. 2022},
+  urldate = {2024-07-09}
+}
+
+@inproceedings{jiaDataModelParallelism2019,
+  title = {Beyond {{Data}} and {{Model Parallelism}} for {{Deep Neural Networks}}},
+  booktitle = {Proceedings of the 2nd {{Conference}} on {{Machine Learning}} and {{Systems}} ({{MLSys}} 2019)},
+  author = {Jia, Zhihao and Zaharia, Matei and Aiken, Alex},
+  year = {2019},
+  pages = {1--13},
+  address = {Stanford, California, USA, 31 Mar. - 2 Apr. 2019}
+}
+
+@article{raffelExploringLimitsTransfer2020,
+  title = {Exploring the {{Limits}} of {{Transfer Learning}} with a {{Unified Text-to-Text Transformer}}},
+  author = {Raffel, Colin and Shazeer, Noam and Roberts, Adam and Lee, Katherine and Narang, Sharan and Matena, Michael and Zhou, Yanqi and Li, Wei and Liu, Peter J.},
+  year = {2020},
+  journal = {Journal of Machine Learning Research},
+  volume = {21},
+  number = {1},
+  pages = {5485--5551},
+  urldate = {2024-07-09}
+}
+
+@inproceedings{merityPointerSentinelMixture2017,
+  title = {Pointer {{Sentinel Mixture Models}}},
+  booktitle = {Proceedings of the 5th {{International Conference}} for {{Learning Representations}} ({{ICLR}} 2017)},
+  author = {Merity, Stephen and Xiong, Caiming and Bradbury, James and Socher, Richard},
+  year = {2017},
+  publisher = {Curran Associates, Inc.},
+  address = {Toulon, France, 24-26 Apr. 2017},
+  abstract = {Recent neural network sequence models with softmax classifiers have achieved their best language modeling performance only with very large hidden states and large vocabularies. Even then they struggle to predict rare or unseen words even if the context makes the prediction unambiguous. We introduce the pointer sentinel mixture architecture for neural sequence models which has the ability to either reproduce a word from the recent context or produce a word from a standard softmax classifier. Our pointer sentinel-LSTM model achieves state of the art language modeling performance on the Penn Treebank (70.9 perplexity) while using far fewer parameters than a standard softmax LSTM. In order to evaluate how well language models can exploit longer contexts and deal with more realistic vocabularies and larger corpora we also introduce the freely available WikiText corpus.},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language}
+}
+
+@inproceedings{bojarFindings2016Conference2016,
+  title = {Findings of the 2016 {{Conference}} on {{Machine Translation}}},
+  booktitle = {Proceedings of the {{First Conference}} on {{Machine Translation}} ({{WMT}} 2016)},
+  author = {Bojar, Ondrej and Chatterjee, Rajen and Federmann, Christian and Graham, Yvette and Haddow, Barry and Huck, Matthias and Yepes, Antonio Jimeno and Koehn, Philipp and Logacheva, Varvara and Monz, Christof},
+  year = {2016},
+  pages = {131--198},
+  publisher = {ACL},
+  address = {Berlin, Germany,},
+  urldate = {2024-07-11}
+}
+
+@inproceedings{qiZeroBubbleAlmost,
+  title = {Zero {{Bubble}} ({{Almost}}) {{Pipeline Parallelism}}},
+  booktitle = {Proceedings of the 12th {{International Conference}} on {{Learning Representations}} ({{ICLR}} 2024)},
+  author = {Qi, Penghui and Wan, Xinyi and Huang, Guangxing and Lin, Min},
+  address = {Vienna, Austria, 7-11 May 2024}
+}
+
+@article{radfordLanguageModelsAre2019,
+  title = {Language Models Are Unsupervised Multitask Learners},
+  author = {Radford, Alec and Wu, Jeffrey and Child, Rewon and Luan, David and Amodei, Dario and Sutskever, Ilya},
+  year = {2019},
+  journal = {OpenAI blog},
+  volume = {1},
+  number = {8},
+  pages = {9},
+  urldate = {2024-08-05}
+}
+
+@inproceedings{realRegularizedEvolutionImage2019,
+  title = {Regularized {{Evolution}} for {{Image Classifier Architecture Search}}},
+  booktitle = {Proceedings of the {{AAAI Conference}} on {{Artificial Intelligence}}},
+  author = {Real, Esteban and Aggarwal, Alok and Huang, Yanping and Le, Quoc V.},
+  year = {2019},
+  volume = {33},
+  pages = {4780--4789},
+  urldate = {2024-08-05}
+}
+
+@misc{kimTorchgpipeOntheflyPipeline2020a,
+  title = {Torchgpipe: {{On-the-fly Pipeline Parallelism}} for {{Training Giant Models}}},
+  shorttitle = {Torchgpipe},
+  author = {Kim, Chiheon and Lee, Heungsub and Jeong, Myungryong and Baek, Woonhyuk and Yoon, Boogeon and Kim, Ildoo and Lim, Sungbin and Kim, Sungwoong},
+  year = {2020},
+  month = apr,
+  number = {arXiv:2004.09910},
+  eprint = {2004.09910},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-08-05},
+  abstract = {We design and implement a ready-to-use library in PyTorch for performing micro-batch pipeline parallelism with checkpointing proposed by GPipe (Huang et al., 2019). In particular, we develop a set of design components to enable pipeline-parallel gradient computation in PyTorch's define-by-run and eager execution environment. We show that each component is necessary to fully benefit from pipeline parallelism in such environment, and demonstrate the efficiency of the library by applying it to various network architectures including AmoebaNet-D and U-Net. Our library is available at https://github.com/kakaobrain/torchgpipe .},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Distributed Parallel and Cluster Computing,Computer Science - Machine Learning}
+}
+
+@misc{chenTrainingDeepNets2016,
+  title = {Training Deep Nets with Sublinear Memory Cost},
+  author = {Chen, Tianqi and Xu, Bing and Zhang, Chiyuan and Guestrin, Carlos},
+  year = {2016},
+  month = apr,
+  number = {arXiv:1604.06174},
+  eprint = {1604.06174},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-05-09},
+  abstract = {We propose a systematic approach to reduce the memory consumption of deep neural network training. Specifically, we design an algorithm that costs O(sqrt(n)) memory to train a n layer network, with only the computational cost of an extra forward pass per mini-batch. As many of the state-of-the-art models hit the upper bound of the GPU memory, our algorithm allows deeper and more complex models to be explored, and helps advance the innovations in deep learning research. We focus on reducing the memory cost to store the intermediate feature maps and gradients during training. Computation graph analysis is used for automatic in-place operation and memory sharing optimizations. We show that it is possible to trade computation for memory - giving a more memory efficient training algorithm with a little extra computation cost. In the extreme case, our analysis also shows that the memory consumption can be reduced to O(log n) with as little as O(n log n) extra cost for forward computation. Our experiments show that we can reduce the memory cost of a 1,000-layer deep residual network from 48G to 7G with only 30 percent additional running time cost on ImageNet problems. Similarly, significant memory cost reduction is observed in training complex recurrent neural networks on very long sequences.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@inproceedings{kirisameDynamicTensorRematerialization,
+  title = {Dynamic {{Tensor Rematerialization}}},
+  booktitle = {Proceedings of the 9th {{International Conference}} for {{Learning Representations}} ({{ICLR}} 2021)},
+  author = {Kirisame, Marisa and Lyubomirsky, Steven and Haan, Altan and Brennan, Jennifer and He, Mike and Roesch, Jared and Chen, Tianqi and Tatlock, Zachary},
+  publisher = {Curran Associates, Inc.},
+  address = {Virtual Event, 3-7 May 2021},
+  abstract = {Checkpointing enables the training of deep learning models under restricted memory budgets by freeing intermediate activations from memory and recomputing them on demand. Current checkpointing techniques statically plan these recomputations offline and assume static computation graphs. We demonstrate that a simple online algorithm can achieve comparable performance by introducing Dynamic Tensor Rematerialization (DTR), a greedy online algorithm for checkpointing that is extensible and general, is parameterized by eviction policy, and supports dynamic models. We prove that DTR can train an \$N\$-layer linear feedforward network on an \${\textbackslash}Omega({\textbackslash}sqrt\{N\})\$ memory budget with only \${\textbackslash}mathcal\{O\}(N)\$ tensor operations. DTR closely matches the performance of optimal static checkpointing in simulated experiments. We incorporate a DTR prototype into PyTorch merely by interposing on tensor allocations and operator calls and collecting lightweight metadata on tensors.},
+  keywords = {C.3,Computer Science - Machine Learning,Computer Science - Programming Languages,Statistics - Machine Learning}
+}
+
+@article{heHOMEHolisticGPU2022,
+  title = {{{HOME}}: {{A Holistic GPU Memory Management Framework}} for {{Deep Learning}}},
+  shorttitle = {{{HOME}}},
+  author = {He, Shuibing and Chen, Ping and Chen, Shuaiben and Li, Zheng and Yang, Siling and Chen, Weijian and Shou, Lidan},
+  year = {2022},
+  journal = {IEEE Transactions on Computers},
+  volume = {72},
+  number = {3},
+  pages = {826--838},
+  publisher = {IEEE},
+  urldate = {2024-06-07}
+}
+
+@inproceedings{korthikantiReducingActivationRecomputation2023,
+  title = {Reducing {{Activation Recomputation}} in {{Large Transformer Models}}},
+  booktitle = {Proceedings of the 6th {{Conference}} on {{Machine Learning}} and {{Systems}} ({{MLSys}} 2023)},
+  author = {Korthikanti, Vijay Anand and Casper, Jared and Lym, Sangkug and McAfee, Lawrence and Andersch, Michael and Shoeybi, Mohammad and Catanzaro, Bryan},
+  year = {2023},
+  pages = {341--353},
+  address = {Miami Beach, FL, USA, 4-8 Jun. 2023}
+}
+
+@inproceedings{pengCapuchinTensorbasedGPU2020,
+  title = {Capuchin: {{Tensor-based GPU Memory Management}} for {{Deep Learning}}},
+  shorttitle = {Capuchin},
+  booktitle = {Proceedings of the 25th {{International Conference}} on {{Architectural Support}} for {{Programming Languages}} and {{Operating Systems}} ({{ASPLOS}} 2020)},
+  author = {Peng, Xuan and Shi, Xuanhua and Dai, Hulin and Jin, Hai and Ma, Weiliang and Xiong, Qian and Yang, Fan and Qian, Xuehai},
+  year = {2020},
+  month = mar,
+  pages = {891--905},
+  publisher = {ACM},
+  address = {Lausanne, Switzerland, 16-20 Mar. 2020},
+  doi = {10.1145/3373376.3378505},
+  urldate = {2024-02-26},
+  isbn = {978-1-4503-7102-5}
+}
+
+@article{sabneXlaCompilingMachine2020,
+  title = {Xla: {{Compiling}} Machine Learning for Peak Performance},
+  shorttitle = {Xla},
+  author = {Sabne, Amit},
+  year = {2020},
+  journal = {Google Res},
+  urldate = {2024-07-09}
+}
+
+@inproceedings{anselPyTorchFasterMachine2024,
+  title = {{{PyTorch}} 2: {{Faster Machine Learning Through Dynamic Python Bytecode Transformation}} and {{Graph Compilation}}},
+  shorttitle = {{{PyTorch}} 2},
+  booktitle = {Proceedings of the 29th {{ACM International Conference}} on {{Architectural Support}} for {{Programming Languages}} and {{Operating Systems}} ({{ASPLOS}} 2024)},
+  author = {Ansel, Jason and Yang, Edward and He, Horace and Gimelshein, Natalia and Jain, Animesh and Voznesensky, Michael and Bao, Bin and Bell, Peter and Berard, David and Burovski, Evgeni},
+  year = {2024},
+  pages = {929--947},
+  publisher = {ACM},
+  address = {La Jolla, CA, USA, 27 Apr. - 1 May 2024},
+  urldate = {2024-06-17}
+}
+
+@misc{kimTorchgpipeOntheflyPipeline2020,
+  title = {Torchgpipe: {{On-the-fly Pipeline Parallelism}} for {{Training Giant Models}}},
+  shorttitle = {Torchgpipe},
+  author = {Kim, Chiheon and Lee, Heungsub and Jeong, Myungryong and Baek, Woonhyuk and Yoon, Boogeon and Kim, Ildoo and Lim, Sungbin and Kim, Sungwoong},
+  year = {2020},
+  month = apr,
+  number = {arXiv:2004.09910},
+  eprint = {2004.09910},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  urldate = {2024-05-28},
+  abstract = {We design and implement a ready-to-use library in PyTorch for performing micro-batch pipeline parallelism with checkpointing proposed by GPipe (Huang et al., 2019). In particular, we develop a set of design components to enable pipeline-parallel gradient computation in PyTorch's define-by-run and eager execution environment. We show that each component is necessary to fully benefit from pipeline parallelism in such environment, and demonstrate the efficiency of the library by applying it to various network architectures including AmoebaNet-D and U-Net. Our library is available at https://github.com/kakaobrain/torchgpipe .},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Distributed Parallel and Cluster Computing,Computer Science - Machine Learning}
+}
+
+@inproceedings{reedTorchFxPractical2022,
+  title = {Torch.Fx: {{Practical Program Capture}} and {{Transformation}} for {{Deep Learning}} in {{Python}}},
+  shorttitle = {Torch.Fx},
+  booktitle = {Proceedings of the 5th {{Conference}} on {{Machine Learning}} and {{Systems}} ({{MLSys}} 2022)},
+  author = {Reed, James and DeVito, Zachary and He, Horace and Ussery, Ansley and Ansel, Jason},
+  year = {2022},
+  pages = {638--651},
+  address = {Santa Clara, CA, USA, 29 Aug. - 1 Sep. 2022},
+  urldate = {2024-05-05}
+}
+
+@inproceedings{paszkePytorchImperativeStyle2019,
+  title = {Pytorch: {{An Imperative Style}}, {{High-Performance Deep Learning Library}}},
+  shorttitle = {Pytorch},
+  booktitle = {Proceedings of the 33rd {{International Conference}} on {{Neural Information Processing Systems}} ({{NeurIPS}} 2019)},
+  author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca},
+  year = {2019},
+  pages = {8026--8037},
+  publisher = {Curran Associates, Inc.},
+  address = {Vancouver, BC, Canada, 8-14 Dec. 2019},
+  urldate = {2024-05-09}
+}
+
+@inproceedings{abadiTensorFlowSystemLargeScale2016,
+  title = {{{TensorFlow}}: {{A System}} for {{Large-Scale Machine Learning}}},
+  shorttitle = {{{TensorFlow}}},
+  booktitle = {Proceedings of the 12th {{USENIX Conference}} on {{Operating Systems Design}} and {{Implementation}} ({{OSDI}} 2016)},
+  author = {Abadi, Mart{\'i}n and Barham, Paul and Chen, Jianmin and Chen, Zhifeng and Davis, Andy and Dean, Jeffrey and Devin, Matthieu and Ghemawat, Sanjay and Irving, Geoffrey and Isard, Michael},
+  year = {2016},
+  pages = {265--283},
+  publisher = {USENIX Association},
+  address = {Savannah, GA, USA, 2-4 Nov. 2016},
+  urldate = {2024-05-09}
+}

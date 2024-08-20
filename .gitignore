@@ -1,0 +1,16 @@
+*.bbl
+*.sh
+*.out
+*.aux
+*.blg
+*.log
+main*.pdf
+*.synctex
+*.synctex*.gz
+*.latexmk
+*.fdb_latexmk
+*.fls
+*.vscode
+comment.cut
+figures/
+.DS_Store

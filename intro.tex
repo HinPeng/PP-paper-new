@@ -1,0 +1,168 @@
+%!TEX root = main.tex
+\section{Introduction}
+\IEEEPARstart{D}{eep} neural network (DNN) has achieved spectacular success in many fields,
+such as computer vision, autonomous driving,
+especially in the field of natural language processing (NLP),
+like GPT-4~\cite{achiam2023gpt} and Llama3~\cite{dubey2024llama}.
+This such strong power of the DNNs results from the
+the architecture and parameters size development of DNNs.
+However, there is a huge gap between the slow growth rate
+of GPU memory capacity and the exponential growth of model parameters.
+Such large models' training cannot fit into the limited memory of a single GPU.
+Nowadays, seeking to train the large DNNs with multiple GPUs
+is very popular in both academia and industry.
+% (DNN parallel training is important).
+
+There are mainly three kinds of parallelism methods in
+training large scale DNNs, which includes: \emph{Data parallelism (DP)},
+\emph{Tensor parallelism (TP)}, and \emph{Pipeline parallelism (PP)}.
+\emph{DP} divides the training data into multiple shards and distributes them to different devices,
+in which each GPU stores a complete copy of the model parameters.
+At each training iteration, each device needs to communicate with each other
+to integrate and update the model parameters.
+\emph{TP} is a parallelization technique that distributes the computation across
+multiple GPUs by partitioning the tensors along specific dimensions,
+allowing simultaneous processing of different segments of the neural network's data.
+% Although DP and TP are naturally the memory and computation,
+Despite \emph{DP} and \emph{TP} being naturally capable of
+distributing memory and computation evenly across each device,
+\emph{DP} suffers from large communication volumes
+when the parameters size increasingly grows,
+while \emph{TP} suffers from the synchronous
+communication overhead.
+
+In contrast, \emph{pipeline parallelism} aims to parallelize the computations
+between the layers of the DNNs.
+It divides the DNN into multiple layer blocks
+and also divides the input data of a batch into multiple micro-batches
+to enable pipeline parallel execution between different stages.
+The communication only happens between each pair of adjacent stages
+and can be overlapped with the computation of training.
+Therefore, this parallelism paradigm shows a small communication volumes
+compared to \emph{DP} and low communication bandwidth requirement compared to \emph{TP}.
+Nonethless, achieving both high computation and memory utilization
+is a challenge in \emph{PP}.
+% (Pipeline parallelism is an attractive method).
+
+% (Current methods ignore the memory imbalance).
+Current \emph{PP} frameworks can be classified into two categories:
+% according to the way of parameter update:
+\emph{Synchronous Pipeline Parallelism (SPP)} and \emph{Asynchronous Pipeline Parallelsim (ASP)}.
+\emph{SPP} generally suffers from pipeline bubbles overhead
+while \emph{ASP} needs to store multiple versions of model parameters
+for keeping the parameters consistency of the same micro-batch.
+What they have in common is that the model partition goal is
+to guarantee the execution time of each stage as close as possible,
+% in which GPipe[] and PipeDream[] are the most two representative frameworks.
+% PipeDream[] proposes a 1F1B computation scheduling method
+% to eliminate the pipeline bubbles.
+% Current pipeline parallelel partition methods
+% mainly focus on the computation division and dispatching.
+% There are two main factors which will affect the training efficiency of the pipeline parallelism:
+% a). computation time of each stage
+% The key to the pipeline parallelism ,
+since a straggeler stage will make other stages to wait,
+thus slow down the overall training performance.
+% Therefore, the computation balance is the first priority.
+However, merely emphasizing the balance of computation time
+across stages tends to neglect the memory usage at different stages.
+We have observed over 40\% GPU memory waste in current pipeline parallel training frameworks.
+This results from two aspects: 1) the ratio of computation time to memory usage
+varies with different types of layers.
+2) the inconsistency in the number of versions of model parameters,
+activation memory, and gradients required by each stage will
+further exacerbate this memory usage imbalance.
+Such memory imbalance severely affect the memory scablability of pipeline parallelism.
+
+% When consider memory optimization techniques to partition, the problem becomes more complicate.
+Meanwhile, \emph{memory swap}~\cite{rhuVDNNVirtualizedDeep2016,jinLayerCentricMemoryReuse2018,wangSuperneuronsDynamicGPU2018,huangSwapAdvisorPushingDeep2020,renSentinelEfficientTensor2021}
+and \emph{recomputation}~\cite{chenTrainingDeepNets2016,kirisameDynamicTensorRematerialization,heHOMEHolisticGPU2022,korthikantiReducingActivationRecomputation2023} are two popular
+memory reduction techniques in DNN training.
+\emph{Swap} utilizes CPU memory as an external buffer to extend GPU memory
+while \emph{Recomputation} drops the activations memory at forward propagation
+and regenerate them through redundant computation.
+These two methods both affect the memory footprint and execution time of a DNN,
+result in an exponential search space
+when considering pipeline parallel partition in conjunction with
+the memory optimization methods.
+This combination optimization is a \emph{NP-hard} problem.
+
+% Existing works consider in a coarse-grain using layer or layer block as unit, not general.
+All prioir works consider the pipeline parallel partition and memory optimization
+in a coarse granularity at layer or layer block.
+On one hand, this coarse-grain method limit the model partition space
+and increase the memory optimization overhead, in which finer-grain \emph{Tensor} level
+based optimization methods have proved to be more efficient in prior
+memory optimization works[tensile,tsplit,capuchin] in DNN training.
+On the other hand, they rewrite the model code submitted by user
+using the layer (block) as the unit to facilitate the code generation of each stage.
+However, such method is not sufficiently generalizable in production environments,
+such as when the user model includes custom modules or when privacy protection
+is required so that third-party developers cannot observe the model structure.
+
+In this paper, we propose a memory-scablable pipeline parallelism partition method named DawnPiper,
+which aims to achieve both high pipeline parallel training performance and GPU memory utilization.
+Firstly, we propose a DL compilation based profiling approach
+to obtain a fine-grained computation graph of a model.
+This expands the model partition space and gives us the ability
+to subtly adjust the computation time and memory footprint of each stage.
+In the meantime, the module code of each stage can be automatically generated
+via leveraging the DL compilation technique.
+According to the profiling results on the above computation graph in typical DNNs' training,
+% Based on the profiling of memory usage in typical DNNs' training,
+we have observed two memory usage characteristics that
+the majority (can be over 90\%) activation and consumed memory of an operation
+are very small (around 100 MB).
+These two features indicate that 
+we can easily find a partition position
+which has a low communication cost 
+with minimal effect on the computation time and memory footprint at the same time.
+This help us derive a pipeline parallel partition theorem
+which constrain the partition range between the compute-balance and memory-balance partition positions
+when dividing two adjacent pipeline stages.
+
+Secondly, based on the above proposed pipeline partition theorem,
+we propose a binary pipeline parallel partition algorithm.
+By starting from the middle stage,
+we regard the left and right part as two adjacent stages and
+recursively traverse the possible partition positions
+from compute-balance and memory-balance positions.
+For a given partition plan,
+we use a cost model based memory optimization method which is leveraged by Capuchi~\cite{pengCapuchinTensorbasedGPU2020}
+to optimize the memory footprint within the GPU memory capacity in a linear time.
+In this way, we can record the computation time of the longest execution stage.
+After traversing all partition plans,
+the minimal computation time of the longest stage
+is the target (nearly) optimal partition strategy.
+% We consider how to achieve  within the GPU memory capacity 
+
+% We have implemented DawnPiper base on the PyTorch.
+% By evaluating four models including CNN and Transformer models on a 8 A100 GPUs server,
+% the results reveal that .
+The main contributions of DawnPiper are:
+\begin{itemize}
+  \item We propose a DL compilation based model profiling method,
+        which provides a fine-grained control on the pipeline partition and memory optimization,
+        while facilitating the automatic code generation for each pipeline stage.
+  \item Based on the above fine-grained profiling, we have conducted a detailed analysis on
+        the memory usage during model training and observed two memory usage features.
+        Then we propose a pipeline partition theorem which can restrict the partition range
+        between the compute-balance and the memory-balance partition positions.
+  \item Based on the proposed theorem, we propose a binary pipeline partition algorithm,
+        which can efficiently search for the (nearly) optimal partition and memory optimization
+        strategies within the GPU memory capacity limit.
+  \item We have prototyped DawnPiper on PyTorch~\cite{paszkePytorchImperativeStyle2019}. The evaluations reveal that DawnPiper
+        achieves up to 4$\times$ and 11$\times$ increase on trainable maximum batch size
+        compared to vPipe and PipeDream, and up to 1.5$\times$ performance speedup compared to vPipe.
+\end{itemize}
+
+The rest of the this paper is organized as follows.
+Section~\ref{sec:background} introduces the background of
+the pipeline parallelism and two memory optimization techniques.
+Section~\ref{sec:cam} presents the design challeges and motivations of DawnPiper.
+Section~\ref{sec:design} and \ref{sec:imp} give the design overview and
+implementation of DawnPiper.
+Section~\ref{sec:evaluation} evaluates the performance of DawnPiper.
+Section~\ref{sec:related} discusses the related works
+and Section~\ref{sec:conclusion} concludes this paper.
+\label{sec:intro}

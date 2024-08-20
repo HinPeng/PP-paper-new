@@ -1,0 +1,197 @@
+%!TEX root = main.tex
+% only foreign words should be italicized
+\newcommand{\eg}{\textit{e.g.}}
+\newcommand{\ie}{\textit{i.e.}}
+\newcommand{\etal}{\textit{et al.}}
+\newcommand{\etc}{\textit{etc.}}
+\newcommand{\adhoc}{\textit{ad hoc}}
+\newcommand{\viz}{\textit{viz.}}
+
+% general
+\newcommand{\XXX}{{\bf XXX }}
+\newcommand{\sref}[1]{\S\ref{#1}}
+\newcommand{\oursys}{{\textit{Waterwave}}}
+% as Capuchin (Cebus apella) can learn from others’ mistakes
+% url: https://link.springer.com/article/10.1007/s10071-008-0150-7b 
+\newcommand{\automl}{{multi-job}}
+%\newcommand{\oursys}{{TUX2}}
+\newcommand{\ourmodel}{{MEGA}}
+\newcommand{\company}{{Company A}}
+
+% axes
+\newcommand{\xaxis}{$x$-axis}
+\newcommand{\yaxis}{$y$-axis}
+
+% units
+\newcommand{\KB}{~KB}
+\newcommand{\MB}{~MB}
+\newcommand{\GB}{~GB}
+\newcommand{\MBs}{~MB/s}
+\newcommand{\mus}{$\mu s$}
+\newcommand{\ms}{$ms$}
+
+% commands and calls
+\newcommand{\unix}{{\sc Unix}}
+\newcommand{\fsck}{\texttt{fsck}}
+\newcommand{\fsync}{\texttt{fsync}}
+\newcommand{\myread}{\texttt{read}}
+\newcommand{\mywrite}{\texttt{write}}
+\newcommand{\mysync}{\texttt{sync}}
+\newcommand{\txwrite}{\texttt{txwrite}}
+
+% others
+\newcommand{\Term}[1]{{\em #1}}
+\newcommand{\Phrase}[1]{{\it #1}}
+\newcommand{\File}[1]{{\tt #1}}
+\newcommand{\Keyword}[1]{{\small \tt #1}}
+\newcommand{\Symbol}[1]{{\tt #1}}
+\newcommand{\CBox}[1]{{\parbox{\columnwidth}{#1}}}
+\newcommand{\CaptionKeyword}[1]{{\footnotesize \sf #1}}
+\newcommand{\yes}{{$\surd$}}
+\newcommand{\pcie}{PCIe}
+
+% to add space less than a line
+\newcommand{\halfline}{\vspace{6 pt}}
+\newcommand{\quartline}{\vspace{3 pt}}
+\newcommand{\smallline}{\vspace{2 pt}}
+\newcommand{\tinyline}{\vspace{1 pt}}
+
+% bullets and labels
+\newcommand{\mybullet}[1]{
+\vspace{0.02in}
+\noindent$\bullet$
+%\hspace{0.1cm}
+{\bf #1}}
+
+\newcommand{\mybulletnobold}[1]{
+\vspace{0.02in}
+\noindent$\bullet$
+%\hspace{0.1cm}
+{#1}}
+
+\newcommand{\mylabel}[2]{
+\vspace{0.02in}
+\noindent {\bf #1} {#2}
+\hspace{0.01cm}}
+
+\newcommand{\mylabelemph}[1]{
+\vspace{0.02in}
+\noindent {\em #1}
+%\hspace{0.01cm}
+}
+
+\newcommand{\mylabelbold}[1]{
+\vspace{0.02in}
+\noindent {\bf #1}
+%\hspace{0.01cm}
+}
+
+
+% captions
+\newcommand{\beforecaption}{\vspace{-.15cm}\begin{spacing}{0.85}}
+\newcommand{\aftercaption}{\vspace{-.45cm}\end{spacing}}
+\newcommand{\mycaption}[3]{{
+\beforecaption
+\caption{\label{#1} \footnotesize{\textbf{#2}} {\em #3}}
+\aftercaption}}
+
+% some more captions
+\newcommand{\beforecaptiontwo}{\vspace{0.00cm}\begin{spacing}{0.95}}
+\newcommand{\aftercaptiontwo}{\vspace{0.00cm}\end{spacing}}
+\newcommand{\mycaptiontwo}[3]{{
+\beforecaptiontwo
+\caption{\label{#1} {\bf #2} {\em #3}}
+\aftercaptiontwo}}
+
+% system
+\newcommand{\System}[1]{{\footnotesize {\sf #1}}}
+
+% define this for small code snippets
+\newcommand{\code}[1]{{\texttt{#1}}}
+
+% less white space for itemize
+\newenvironment{tightitemize}{%
+\begin{list}{$\bullet$}{%
+%\setlength{\itemsep}{0pt}%
+\setlength{\topsep}{3pt}%
+\setlength{\parskip}{0pt}%
+\setlength{\parsep}{0pt}%
+\renewcommand{\makelabel}[1]{\textbf{##1} }
+\setlength{\labelwidth}{0pt}%
+\setlength{\leftmargin}{5pt}%
+\setlength{\labelsep}{0pt}%
+\setlength{\listparindent}{0pt}%
+}}%
+{\end{list}}
+
+%% \newcommand{\delete}[1]{\if 0 {#1} \fi}
+\newcommand{\VP}[1]{{\bf #1}}
+\newcommand{\TODO}[1]{{\color{red} {\bf #1}}}
+\newcommand{\inlcode}[1]{{\small{\texttt{#1}}}}
+
+%\lstdefinestyle{customc}{
+%	belowcaptionskip=1\baselineskip,
+%	breaklines=true,
+%	frame=L,
+%	xleftmargin=\parindent,
+%	language=python,
+%	showstringspaces=false,
+%	basicstyle=\footnotesize\ttfamily,
+%	keywordstyle=\bfseries\color{green!40!black},
+%	commentstyle=\itshape\color{purple!40!black},
+%	identifierstyle=\color{blue},
+%	stringstyle=\color{orange},
+%}
+%\lstset{escapechar=@,style=customc}
+
+% Define Colors
+% Define Language
+\lstdefinelanguage{myLang}
+{
+	% list of keywords
+	morekeywords={
+		import,
+		if,
+		while,
+		for,
+		void,
+		return,
+		val,
+		new
+	},
+	sensitive=false, % keywords are not case-sensitive
+	morecomment=[l]{//}, % l is for line comment
+	morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+
+\definecolor{customPurple}{RGB}{127,0,127}
+\definecolor{customGreen}{RGB}{0,100,0}
+\definecolor{customBlue}{RGB}{0,0.0,255}
+
+% Set Language
+\lstset{
+	language={myLang},
+	basicstyle=\fontsize{8}{8}\selectfont\ttfamily, % Global Code Style
+%	\bfseries \bfseries\ttfamily\scriptsize\footnotesize
+%	alsoletter={0,1,2,3,4,5,6,7,8,9},
+%	morekeywords=[2]{1,2,3,1000},
+%	keywordstyle=[2]\color{orange},
+%	literate={1000}{{{\color{orange}1000}}}4,
+	captionpos=b, % Position of the Caption (t for top, b for bottom)
+	extendedchars=true, % Allows 256 instead of 128 ASCII characters
+	tabsize=4, % number of spaces indented when discovering a tab 
+	columns=fixed, % make all characters equal width
+	keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
+	showstringspaces=false, % lets spaces in strings appear as real spaces
+	breaklines=true, % wrap lines if they don't fit
+	frame=none, % draw a frame at the top, right, left and bottom of the listing
+	frameround=tttt, % make the frame round at all four corners
+	framesep=4pt, % quarter circle size of the round corners
+%	numbers=left, % show line numbers at the left
+%	numberstyle=\tiny\ttfamily, % style of the line numbers
+	commentstyle=\color{customGreen}, % style of comments
+	keywordstyle=\color{customBlue}, % style of keywords
+	stringstyle=\color{customPurple}, % style of strings
+}
