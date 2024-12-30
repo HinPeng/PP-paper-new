@@ -2,14 +2,17 @@
 % \section{Conclusions and Future Works}
 \section{Conclusions}
 \label{sec:conclusion}
-This paper proposes a memory scablable pipeline parallel training framework named DawnPiper,
-which aims at achieving efficient pipeline parallel training while reducing the waste of GPU memory resources,
-thereby supporting the pipeline parallel training of larger-scale models under limited GPU resources.
-DawnPiper first compiles and profiles the model to obtain its fine-grained computation graph and computation memory usage characteristics,
-refining the model partitioning and memory optimization space.
-Then, based on the observation of the model's memory usage characteristics during the training process,
-it designs a binary pipeline parallel partitioning method based on partition range limitation,
-combined with a memory optimization method based on the cost model, greatly reducing the search space of pipeline parallel partitioning.
-The experimental results on four typical DNNs show that DawnPiper can increase the trainable batch size by an average of
-1.29 times and 1.71 times compared to GPipe and vPipe, respectively, and can even reach 4.8-11 times compared to PipeDream,
-and can accelerate the parallel training speed of vPipe by up to 1.5 times.
+This paper introduces DawnPiper,
+a memory-scalable pipeline parallel training framework
+designed to achieve efficient pipeline parallelism while minimizing GPU memory resource waste.
+The framework begins by compiling and profiling the model to
+obtain a fine-grained computation graph and detailed memory usage characteristics,
+which refines the model partitioning and memory optimization space.
+Based on observed memory usage features during training,
+DawnPiper employs a binary pipeline parallel partitioning method with partition range limitations,
+combined with a cost-model based memory optimization method.
+% This approach significantly reduces the search space for pipeline parallel partitioning.
+Experimental results on four typical DNNs demonstrate that
+DawnPiper increases the trainable batch size by an average of 1.29$\times$ and 1.71$\times$ compared to GPipe and vPipe, respectively,
+and up to 4.8$\times$–11$\times$ compared to PipeDream.
+Additionally, it accelerates the parallel training speed of vPipe by up to 1.5$\times$.

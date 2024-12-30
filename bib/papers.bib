@@ -578,3 +578,51 @@
   address = {Savannah, GA, USA, 2-4 Nov. 2016},
   urldate = {2024-05-09}
 }
+
+@article{zhangTENSILETensorGranularity2022,
+  title = {{{TENSILE}}: {{A Tensor Granularity Dynamic GPU Memory Scheduling Method Toward Multiple Dynamic Workloads System}}},
+  shorttitle = {{{TENSILE}}},
+  author = {Zhang, Kaixin and Wang, Hongzhi and Hu, Han and Zou, Songling and Qiu, Jiye and Li, Tongxin and Wang, Zhishun},
+  year = {2022},
+  journal = {IEEE Transactions on Knowledge and Data Engineering},
+  volume = {35},
+  number = {8},
+  pages = {8630--8643},
+  publisher = {IEEE},
+  urldate = {2024-06-07}
+}
+
+@inproceedings{nieTSPLITFinegrainedGPU2022,
+  title = {{{TSPLIT}}: {{Fine-grained GPU Memory Management}} for {{Efficient DNN Training}} via {{Tensor Splitting}}},
+  shorttitle = {Tsplit},
+  booktitle = {Proceedings of the {{IEEE}} 38th {{International Conference}} on {{Data Engineering}} ({{ICDE}} 2022)},
+  author = {Nie, Xiaonan and Miao, Xupeng and Yang, Zhi and Cui, Bin},
+  year = {2022},
+  pages = {2615--2628},
+  publisher = {IEEE},
+  address = {Virtual Event, 9-11 May 2022},
+  urldate = {2024-06-07}
+}
+
+@inproceedings{wahibScalingDistributedDeep2020,
+  title = {Scaling {{Distributed Deep Learning Workloads}} beyond the {{Memory Capacity}} with {{KARMA}}},
+  booktitle = {Proceedings of the {{International Conference}} for {{High Performance Computing}}, {{Networking}}, {{Storage}} and {{Analysis}} ({{SC}} 2020)},
+  author = {Wahib, Mohamed and Zhang, Haoyu and Nguyen, Truong Thao and Drozd, Aleksandr and Domke, Jens and Zhang, Lingqi and Takano, Ryousei and Matsuoka, Satoshi},
+  year = {2020},
+  pages = {1--15},
+  publisher = {IEEE},
+  address = {Atlanta, GA, USA, 9-19 Nov. 2020},
+  abstract = {The dedicated memory of hardware accelerators can be insufficient to store all weights and/or intermediate states of large deep learning models. Although model parallelism is a viable approach to reduce the memory pressure issue, significant modification of the source code and considerations for algorithms are required. An alternative solution is to use out-of-core methods instead of, or in addition to, data parallelism. We propose a performance model based on the concurrency analysis of out-of-core training behavior, and derive a strategy that combines layer swapping and redundant recomputing. We achieve an average of 1.52x speedup in six different models over the state-of-the-art out-of-core methods. We also introduce the first method to solve the challenging problem of out-of-core multi-node training by carefully pipelining gradient exchanges and performing the parameter updates on the host. Our data parallel out-of-core solution can outperform complex hybrid model parallelism in training large models, e.g. Megatron-LM and Turning-NLG.},
+  keywords = {Computer Science - Distributed Parallel and Cluster Computing,Computer Science - Machine Learning}
+}
+
+@article{miao2023hetu,
+  title={Hetu: A highly efficient automatic parallel distributed deep learning system},
+  author={Miao, Xupeng and Nie, Xiaonan and Zhang, Hailin and Zhao, Tong and Cui, Bin},
+  journal={Science China Information Sciences},
+  volume={66},
+  number={1},
+  pages={117101},
+  year={2023},
+  publisher={Springer Nature BV}
+}

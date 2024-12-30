@@ -2,166 +2,136 @@
 \section{Design of DawnPiper}
 \label{sec:design}
 \subsection{Design Overview}
-The overall architecture of DawnPiper is shown in Figure~\ref{fig:sys_arch},
-which includes three modules for the partition of the pipeline parallelism.
-We will give them a brief introduction next.
-
-\begin{figure*}[t]
+The overall architecture of DawnPiper is illustrated in Figure~\ref{fig:sys_arch},
+comprising three key modules responsible for pipeline parallelism partitioning.
+Below, we provide a brief introduction to each module.
+\begin{figure*}
   \centering
   \includegraphics[width=0.95\linewidth]{pp-opt-arch-crop.pdf}
   \caption{DawnPiper System Architecture}
   \label{fig:sys_arch}
 \end{figure*}
 
-\textbf{Compiler:} Once the user submits a model for pipeline parallelism,
-the \emph{compiler} obtains its fine-grained computation graph via DL compilation.
-The computation graph includes all operators (nodes) in the training process and
-the connection information between nodes.
-This compilation-based approach allows subsequent model partitioning
-and memory optimization to be performed
-on this fine-grained computation graph.
-In the meantime, the model code of each stage after the model partitioning
-can be automatically generated based on the partitioned sub-graphs,
-eliminating the need for manual involvement in the process,
-making the system highly versatile and practical.
+\textbf{Compiler:} When a model is submitted to DawnPiper,
+the compiler generates a fine-grained computation graph using DL compilation techniques.
+This graph captures all operators (nodes) involved in the training process along with their connections.
+Leveraging this compilation-based approach enables precise model partitioning and memory optimization at a detailed level.
+Additionally, the compiler automatically generates the code for each stage based on the partitioned sub-graphs,
+removing the need for manual intervention and enhancing the system’s versatility and practicality.
 
-\textbf{Profiling:} This module is responsible for acquiring the
-execution metadata of each node for the fine-grained computation graph.
-For a node \emph{n}, its execution metadata data include the forward computation time $t_f^n$,
-backward computation time $t_b^n$, the activation memory size $m_a^n$,
-the size of the model parameters and optimizer states at this node $m_p^n$,
-and the list of saved tensor ${st}^n$.
-Based on the nodes dependencies information,
-the memory size that needs to be released at each node can be inferred as $m_d^n$.
-With the above information, the computation time, peak memory usage,
-and inter-stage communication volume of each stage can
-be easily deduced when partitioning the model at any nodes.
-Meanwhile, the memory optimization policy could also be decided using the metadata.
+\textbf{Profiling:} This module collects execution metadata for each node in the fine-grained computation graph.
+For a node \emph{n}, the metadata includes forward computation time $t_f^n$,
+backward computation time $t_b^n$, activation memory size $m_a^n$,
+model parameters and optimizer states size $m_p^n$, and the list of saved tensors ${st}^n$.
+The memory size that needs to be released at each node $m_d^n$ can also be inferred
+via leveraging node dependency information.
+With above data, the computation time, peak memory usage,
+and inter-stage communication volume for any pipeline partitioning can be easily determined.
+Additionally, this metadata informs memory optimization strategies.
 
-\textbf{Pipeline Partitioning:} This module is responsible for the pipeline partition.
-The basic idea is limiting the pipeline partition range between
-the positions of the compute-balance and memory-balance.
-When traversing each possible partition positions,
-the memory optimization module will identifie the minimum
-memory optimization cost that allows each stage's training process to
-meet the GPU memory capacity limit for a given model partitioning.
-After traversing all model partition positions,
-the target partition strategy is the one with the
-smallest time of the longest execution stage.
+\textbf{Pipeline Partitioning:} This module handles the pipeline partitioning process.
+The key idea is to constrain partitioning within the range defined by the compute-balanced and memory-balanced points.
+As each potential partition position is evaluated,
+the memory optimization module identifies the minimum memory optimization cost
+required to ensure each stage remains within GPU memory limits.
+After evaluating all possible partition points,
+the optimal strategy is the one where the longest stage has the shortest execution time.
 
-% \textbf{Memory Optimization Module:} This module identifies the minimum memory optimization cost method
-% that allows the model execution process in each stage to meet the GPU memory capacity limit for each
-% pipeline partitioning method obtained by traversing every partition position in the aforementioned
-% pipeline partitioning module. This allows the deduction of the longest execution time stage under
-% this partition strategy and records the corresponding execution time.
-
-Next, we will dive into the details of the pipeline parallelism partition and memory optimization algorithms.
+In the following section, we will explore the pipeline partitioning and memory optimization algorithms in detail.
 
 \subsection{Pipeline Terminology and Partition Theorem}
-The number of the pipeline stages is denoted as $\ell$,
-For a pipeline stage $x$, $x \in [1, \ell]$,
-the set of computation nodes it contains is defined as $\mathcal{N}_x$.
-The computation time of this stage can be obtained
-by adding the forward and backward computation times
-of all nodes in the set, as shown in Equation (3.1).
+The number of pipeline stages is denoted $\ell$.
+For a pipeline stage $x$, where $x \in [1, \ell]$,
+the set of computation nodes it contains is represented as $\mathcal{N}_x$.
+The computation time for this stage is determined by summing the
+forward and backward computation times of all nodes in $\mathcal{N}_x$, as shown in Equation~(\ref{equ:tx}).
 \begin{align}
   T_x=\sum_{n \in \mathcal{N}_x}\left(t_f^n+t_b^n\right)
+\label{equ:tx}
 \end{align}
 
-The peak memory usage of a stage can be calculated according
-to the set of nodes in the stage and the pipeline scheduling method.
-The optimal performance partition is to make the
-processing time of all stages as close as possible.
-Since the inter-stage communication mentioned earlier
-can be minimal and can be executed concurrently with computation,
-the goal is to minimize the computation time of the longest stage,
-i.e., the stage with the longest execution time, among all partitioning strategies,
-while the peak GPU memory usage of all stages are less than the GPU memory capacity,
-that is $minimize\ \max_{1 \leq x \leq \ell} T_x$.
+The peak memory usage for a stage is calculated based on the nodes within the stage and the pipeline scheduling method.
+The goal of optimal partitioning is to balance the computation times across all stages,
+ensuring they are as close as possible.
+Since inter-stage communication is minimal and can be overlapped with computation,
+the objective is to minimize the execution time of the longest stage, i.e.,
+the stage with the maximum computation time across all partitioning strategies.
+This optimization is subject to the constraint that the peak GPU memory usage of
+all stages remains within the GPU’s capacity.
+In other words, the goal is to minimize $minimize\ \max_{1 \leq x \leq \ell} T_x$.
 
-Due to the fine-grained computation graph obtained by DL compilation,
-the entire search space will grow exponentially and become very large
-if we consider all possible partition positions coupled with each
-possible memory optimization combinations.
-Therefore, it is necessary to eliminate unreasonable
-pipeline partitions to shrink the total search space.
-We propose a partition theorem to restrict the partition space
-by leveraging the memory usage features mentioned above.
+Given the fine-grained computation graph generated through DL compilation,
+the search space for pipeline partitioning grows exponentially
+when considering all possible partition points combined with different memory optimization strategies.
+This makes the search space extremely large.
+To address this, it is crucial to eliminate impractical partition strategies and reduce the overall search space.
+We propose a partition theorem that leverages the memory usage characteristics discussed earlier
+to effectively limit the partition space.
 
-\textbf{Theorem:} Given a model that needs to be divided into two pipeline stages,
-the optimal pipeline partition must exist in the closed interval between the compute-balance and
-memory-balance partition positions when the following three conditions are met:
-1) The computation time and memory usage during the forward propagation
-show a monotonically increasing trend as operations are continuously scheduled;
-2) The time required for inter-stage communication is
-always less than the computation time of the stage;
-3) The memory optimization targets are evenly distributed throughout the entire model.
+\textbf{Theorem:} For a model that needs to be divided into two pipeline stages,
+the optimal partition point will lie within the closed interval between the
+compute-balanced and memory-balanced positions, provided the following three conditions are met:
+1) The computation time and memory usage during forward propagation exhibit
+a monotonically increasing trend as operations are progressively scheduled;
+2) The inter-stage communication time is consistently less than the computation time of each stage;
+3) Memory optimization opportunities are evenly distributed across the model.
 
-\textbf{Proof:} For convenience, let's illustrate with the simplest example of a
-2-stage pipeline parallelism, and the proof can be extended to more than 2 stages accordingly.
-The pipeline compute-balance and memory-balance partition positions
-are denoted as $\rho_{cb}$ and $\rho_{mb}$, respectively.
-For the 1F1B computation scheduling in the asynchronous pipeline,
-since the earlier stages need to store more activations and parameters memory,
-the position of $\rho_{cb}$ is usually further to the right than $\rho_{mb}$
-(the case where the positions are reversed can also be proven using the following method).
-As shown in the model partitioning in step 3 of Figure~\ref{fig:sys_arch},
-if the partition position is moved further to the right from $\rho_{cb}$,
-which means more computation nodes are assigned to the first stage,
-due to the feature of monotonicity of computation time and memory usage,
-and the negligible communication overhead,
-the computation time and peak memory usage of the first stage are increasing,
-while that of the second stage are decreasing.
-Since the memory optimization targets are essentially
-evenly distributed throughout the entire model structure,
-there will not be a stage with smaller memory usage
-that requires a greater memory optimization cost to meet the GPU memory limit.
-This leads to the fact that no matter whether memory optimization is needed,
-the first stage is definitely the longest stage,
-and it exceeds the computation time of the longest stage under the compute-balance partition.
-So the pipeline parallel training performance is continuously
-decreasing as the partition position moves from $\rho_{cb}$ to the right.
-Similarly, if the partition position is moved further to the left from $\rho_{mb}$,
-then the second stage is definitely the longest computation time stage,
-and it will continuously increase as the movement progress.
+\textbf{Proof:} The compute-balanced and memory-balanced
+partition points are denoted as $\rho_{cb}$ and $\rho_{mb}$, respectively.
+In the 1F1B computation scheduling of asynchronous pipelines parallelism,
+the earlier stages generally need to store more activation and parameter memory,
+resulting in $\rho_{cb}$ typically being positioned further to the right than $\rho_{mb}$
+(the reverse case can be proven similarly).
+When the partition point is shifted to the right from $\rho_{cb}$,
+more computation nodes are allocated to the first stage.
+Due to the monotonic increase in both computation time and memory usage,
+and given that inter-stage communication overhead is negligible,
+the computation time and peak memory usage of the first stage increase,
+while those of the second stage decrease.
+Since memory optimization opportunities are evenly distributed across the model,
+no stage with lower memory usage will require a disproportionately
+high memory optimization cost to stay within the GPU memory limit.
+Consequently, regardless of whether memory optimization is applied,
+the first stage becomes the stage with the longest computation time,
+surpassing the longest stage under the compute-balanced partition,
+leading to a decline in pipeline training performance as the partition shifts rightward from $\rho_{cb}$.
+Similarly, if the partition point is moved leftward from $\rho_{mb}$,
+the second stage will become the one with the longest computation time
+ which will continue to increase as the partition point shifts further left.
 
-\subsection{Compute and Memory Balance Partition}
-In this section, we will introduce how to find the compute-balance and memory-balance partition positions.
-The basic process is to traverse the nodes in the compute graph according to the execution order,
-continuously accumulating the forward/backward computation time or the memory consumption.
-Since the memory footprint of each stage needs to consider the
-stage number in asynchronous pipeline parallelism,
-while the computaiton time of each stage can be simply added,
-we only give the memory-balance partition algorithm for PipeDream
-in this section which is shown as Algorithm~\ref{alg:mem-ba}.
+\subsection{Compute and Memory Balanced Partition}
+In this section, we describe the process for determining the compute-balanced and memory-balanced partition points.
+The general approach involves traversing the computation graph according to the execution order,
+while continuously accumulating the forward/backward computation time or memory consumption.
+Since asynchronous pipeline parallelism, such as in PipeDream,
+requires accounting for stage-specific memory footprints
+(due to differing numbers of activation and parameter copies across stages),
+while computation time can be simply summed,
+we focus on presenting the memory-balance partition algorithm for PipeDream, shown in Algorithm~\ref{alg:mem-ba}.
 
-Before the algorithm begins,
-we first traverse the compute graph to calculate the depth of each node.
-Nodes with the same depth are sorted by the start time of forward computation,
-and this node set is denoted as $\mathcal{N}_\mathcal{G}$ for the algorithm input.
-Besides, the inputs also include the GPU peak memory usage $M_\mathcal{G}$ and the number of pipeline stages $\ell$.
-The output of the algorithm is the partition positions of each stage $\rho_x$.
-The ratio of activations and parameters copies that need to be stored from the first stage
-to the last stage is $\ell:(\ell-1):(\ell-2):\cdots:1$ in PipeDream.
-If the peak memory usage corresponding to each stage for a micro-batch is defined as $M_x$,
-in order to make the peak memory usage of all stages equal,
-the following equation must exist:
+Before executing the algorithm, we first traverse the computation graph to determine the depth of each node.
+Nodes with the same depth are then sorted based on the start time of forward computation,
+forming the node set $\mathcal{N}_\mathcal{G}$, which serves as an input to the algorithm.
+Additional inputs include the GPU peak memory limit $M_\mathcal{G}$ and the number of pipeline stages $\ell$.
+The algorithm outputs the partition positions $\rho_x$ for each stage.
+In PipeDream, the ratio of activation and parameter copies that need to be stored across stages is
+$\ell:(\ell-1):(\ell-2):\cdots:1$.
+If the peak memory usage of a micro-batch for each stage is denoted as $M_x$,
+the following equation must hold to ensure balanced peak memory usage across all stages.
 \begin{align}
   \ell \times M_1=\cdots=(\ell-x+1) \times M_x=\cdots=M_{\ell}
 \end{align}
-% \ell \times M_1=(\ell-1) \times M_2=\cdots=(\ell-x+1) \times M_x=\cdots=M_{\ell}
-Based on this equation, the $M_x$ of each stage can be calculated,
-as shown in lines 2-5 and line 12 of Algorithm~\ref{alg:mem-ba}.
-In this way, the algorithm can continuously traverse the nodes,
-first adding the activation memory, parameter memory, and optimizer state memory size of the node,
-and then determining whether it exceeds the previously recorded peak memory size.
-Next, subtract the memory size that needs to be released at this node,
-and continue to repeat until the peak memory size reaches the current stage's $M_x$.
-At this point, current node is the position where this stage needs to be partitioned.
-It should be noted that for the sake of convenience in description,
-the partition position is a single node,
-but it is usually a set of nodes in practice.
-
+Based on this equation, the $M_x$ for each stage is computed,
+as outlined in lines 2-5 and line 12 of Algorithm~\ref{alg:mem-ba}.
+The algorithm then iteratively traverses the nodes,
+first adding the activation memory, parameter memory,
+and optimizer states memory of each node,
+while checking if the accumulated memory exceeds the previously recorded peak memory.
+Next, it subtracts the memory that needs to be released at the current node,
+repeating this process until the accumulated peak memory reaches the target $M_x$ for the current stage.
+At this point, the current node marks the partition point for that stage.
+Although the description in the algorithm simplifies the partition point as a single node,
+it typically involves a set of nodes in practice.
 \begin{algorithm}
   \SetKwInOut{Input}{Input}
   \SetKwInOut{Output}{Output}
@@ -192,71 +162,56 @@ but it is usually a set of nodes in practice.
 \end{algorithm}
 
 \subsection{Binary Pipeline Parallel Partition}
-If the peak memory footprint of all stages at compute-balance partition
-are less than the GPU memory capacity,
-then this is already the optimal pipeline partitioning
-in terms of performance.
-Otherwise, it is necessary to continuously move the partition position from
-$\rho_{cb}$ the towards the $\rho_{mb}$ or take memory optimization
-operations to reduce memory usage.
-Both of these two methods will change the execution time of a stage,
-it is difficult to analyze which partition and memory optimization strategy
-will produce the optimal pipeline parallel performance.
-Therefore, it is necessary to perform a combination traversal of the possibilities.
-During the process, given a pipeline partition, the goal of memory optimization for each stage
-is to minimize the memory optimization cost while meeting the GPU memory capacity limit.
-Define the minimum memory optimization cost time corresponding to stage $x$ as $T_x^{moo}$,
-then the objective of the pipeline partition with memory optimization
-is to $minimize\ \max_{1 \leq x \leq \ell} (T_x + T_x^{moo})$ .
+If the peak memory usage of all stages under the compute-balanced partition is within the GPU memory capacity,
+this partition strategy already represents the optimal pipeline partition in terms of performance.
+However, if any stage exceeds the GPU memory limit,
+the partition point must either be gradually adjusted from $\rho_{cb}$ toward $\rho_{mb}$
+or memory optimization strategies must be applied to reduce memory usage.
+Both methods alter the execution time of the stages,
+making it difficult to predict which partition and memory optimization strategy will yield the best pipeline performance.
+Consequently, a combinatorial search over these options is necessary.
+In this process, for a given pipeline partition,
+the goal of memory optimization for each stage is to minimize the optimization cost
+while ensuring it stays within the GPU memory capacity.
+Let $T_x^{moo}$ represent the minimum memory optimization cost time for stage $x$.
+The objective then becomes $minimize\ \max_{1 \leq x \leq \ell} (T_x + T_x^{moo})$.
 
-It should be noted that during the process of moving from the $\rho_{cb}$
-to the $\rho_{mb}$, if the peak memory usage of the adjacent two stages after partitioning
-are less than the GPU memory limit without memory optimization,
-then there is no need to continue to traverse subsequent partition possibilities.
-This conclusion can also be proven using the above theorem.
-In simple terms, if the partition position continues to move at this time,
-the computation time and memory usage of the stage
-with more computation time will continue to increase.
-Regardless of whether it still needs memory optimization,
-its total computation time will continuously increase
-and exceed the longest execution stage's computation time at the current partition position.
-% Therefore, the shortest time of the longest execution stage during the partition position movement
-% will definitely not appear behind this partition position.
+It is important to note that when shifting the partition point from $\rho_{cb}$ toward $\rho_{mb}$,
+if the peak memory usage of the two adjacent stages after partitioning
+are within the GPU memory capacity without requiring memory optimization,
+further exploration of additional partition options is unnecessary.
+This can be demonstrated by the theorem discussed earlier.
+Briefly speaking, if the partition point continues to shift,
+the computation time and memory usage of the stage with the higher computation load will keep increasing.
+Whether memory optimization is needed or not,
+the overall computation time for this stage will progressively rise,
+surpassing the computation time of the longest stage at the current partition point.
 
 Based on the above discussion,
-the naive idea is to start from the $\rho_{cb}$
-of the first stage and continuously move towards the $\rho_{mb}$ for traversal.
-For each position, calculate the $\rho_{cb}$ and
-$\rho_{mb}$ of the subsequent $\ell - 1$ stages
-until the last two adjacent stages.
-Then we use memory optimization to obtain the minimal cost for each stage.
-By that, we can know the computation time of the longest execution stage for the current partition positions.
-After traversing all partition positions,
-we can find the optimal partition and memory optimization strategy.
-% is the strategy corresponding to the minimum computation time of the longest execution stage.
-Although the range of each partitioning operation is restricted between the $\rho_{cb}$
-and the $\rho_{mb}$, the search space increases exponentially with the number of pipeline stages.
-Therefore, to cope with the pipeline parallel partitioning of longer stages,
-we adopts a binary pipeline parallel partitioning method,
-which first enumerates from the middle stage of the pipeline.
-Each time the middle is divided, the left and right parts are regarded as two stages
-to achieve compute-balance and memory-balance.
-In this way, the shortest computation time of the longest execution stage
-on the left and right parts at each binary partitioning can be found level by level.
-When the outermost level finishes traversing all possible partition positions,
-then the optimal partition strategy can be found.
-By that, the complexity of the partition algorithm is successfully
-reduced to $\mathcal{O}(\varphi^{log\ell})$,
-where $\varphi$ represents the number of possible partitions that
-need to be traversed from the $\rho_{cb}$ to the $\rho_{mb}$.
-This number is far smaller than the total number of nodes in the model.
-Take the BERT for example, its total nodes are more than 1000,
-in which the number of nodes in this range are less than 100.
-% and the communication optimization method to be introduced below can further reduce the
-% possible partition positions.
-The overall process of this partitioning method is shown in Algorithm~\ref{alg:binary-partition}.
-
-\begin{algorithm}[t]
+a straightforward approach is to start from the compute-balanced partition $\rho_{cb}$ of
+the first stage and iteratively move toward the memory-balanced
+partition $\rho_{mb}$ while traversing possible partition points.
+For each position, the $\rho_{cb}$ and $\rho_{mb}$ of the remaining $\ell - 1$ stages
+are calculated until the last two adjacent stages are reached.
+Memory optimization is then applied to determine the minimal cost for each stage.
+Then we can record the computation time of the longest execution stage for the current partition position.
+By traversing all partition possibilities, the optimal partition and memory optimization strategy can be identified.
+Although the partition range is constrained between $\rho_{cb}$ and $\rho_{mb}$,
+the search space grows exponentially with the number of pipeline stages.
+To efficiently handle partitioning for deeper pipelines, we employ a binary partitioning approach.
+This method first selects the middle stage of the pipeline,
+treating the left and right segments as separate stages,
+and applies compute-balanced and memory-balanced partitioning.
+This approach allows the shortest computation time for the longest execution stage
+on either side to be determined incrementally, level by level.
+Once all possible partition positions have been explored at the outermost level,
+the optimal partition strategy is identified.
+This approach reduces the partitioning algorithm's complexity to $\mathcal{O}(\varphi^{log\ell})$,
+where $\varphi$ represents the number of potential partition points traversed between $\rho_{cb}$ and $\rho_{mb}$.
+This number is significantly smaller than the total number of nodes in the model.
+For example, BERT has over 1000 nodes, but the number of nodes within this range is less than 100.
+The overall process for this partitioning method is illustrated in Algorithm~\ref{alg:binary-partition}.
+\begin{algorithm}
   \SetKwInOut{Input}{Input}
   \SetKwInOut{Output}{Output}
   \SetKwFunction{Fmain}{BinaryPartition}
@@ -304,96 +259,74 @@ The overall process of this partitioning method is shown in Algorithm~\ref{alg:b
       }
     }
   }
-
 \caption{Binary pipeline parallel partition}
 \label{alg:binary-partition}
 \end{algorithm}
 
-The \texttt{AdjacentPartition} function of the Algorithm~\ref{alg:binary-partition}
-describe how to find the partitioning and memory optimization strategy
+The \texttt{AdjacentPartition} function in Algorithm~\ref{alg:binary-partition}
+outlines the process for identifying the partition and memory optimization strategy
 that minimizes the difference in computation time between two adjacent stages.
-The $\rho_{cb}$ and $\rho_{mb}$ of two adjacent stages
-can be easily found by modifying Algorithm~\ref{alg:mem-ba}.
-The line 7-8 describes the memory optimization process for the adjacent stages which
-finds the policy that can achieve the shortest execution time under the memory limit.
-The line 10-13 means the traversal process can exit in advance
-when there is no memory optimization for the two stages.
-This function finally returns the optimal partition and memory optimization strategies
-and the corresponding execution time of the longer stage.
-The \texttt{BinaryPartition} function of the Algorithm~\ref{alg:binary-partition}
-is the main process of the binary partitioning algorithm.
-The line 18-19 invokes the above \texttt{AdjacentPartition} function
-when reaching two adjacent stages.
-Otherwise, it calculates the $\rho_{cb}$ and $\rho_{mb}$ when partitioning from the middle.
-The lines 24-25 represent the optimal results of the left and right partitions that continue to be
-recursively divided, including the partition position, memory optimization strategy,
-and the shortest execution time of the longest stage.
-In this way, the final optimal pipeline partitioning and memory optimization strategy
-can by obtained by calling \texttt{BinaryPartition}$(\mathcal{N}_\mathcal{G}, 1, \ell)$.
+The compute-balanced $\rho_{cb}$ and memory-balanced $\rho_{mb}$ points
+for these two stages can be derived by adjusting Algorithm~\ref{alg:mem-ba}.
+Lines 7-8 describe the memory optimization procedure,
+which determines the policy that results in the shortest execution time within the memory constraints.
+Lines 10-13 allow for early termination of the traversal if no further memory optimization is needed between the two stages.
+The function ultimately returns the optimal partition, memory optimization strategy,
+and the corresponding execution time for the longer of the two stages.
 
-Note that although the above algorithm requires that the number of pipeline stages
-need to be an exponential number of 2,
-we will traverse from the first stage's compute/memory-balance partition positions
-when the left number of pipeline stages is 3.
-Hence, the proposed algorithm can handle any number of pipeline stages.
-% $BinaryPartition(\mathcal{N}_\mathcal{G}, 1, \ell)$.
-% the final optimal pipeline partitioning and memory optimization strategy results can be obtained.
+The \texttt{BinaryPartition} function serves as the core of the binary partitioning algorithm.
+Lines 18-19 call the \texttt{AdjacentPartition} function when only two adjacent stages remain.
+Otherwise, the function calculates the compute-balanced and memory-balanced points when partitioning from the midpoint.
+Lines 24-25 capture the optimal results for the left and right partitions,
+which are recursively refined, including the partition points, memory optimization strategies
+and the shortest execution time for the longest stage.
+By invoking \texttt{BinaryPartition}$(\mathcal{N}_\mathcal{G}, 1, \ell)$,
+the final optimal pipeline partitioning and memory optimization strategy is determined.
 
-\textbf{Communication Optimization:} It should be noted that a premis
-of the partitioning theorem is that the communication overhead
-will not become a factor affecting the efficiency of pipeline parallelism.
-Therefore, it is necessary to avoid partition positions
-that will generate large communication volumes
-during the traversal process within the partition range.
-As mentioned in Section~\ref{sec:mot}, there are a large number of computation nodes 
-and the majority of their activations memory are very small.
-Firstly, we can determine the inevitable memory communication,
-i.e., a node owns an edge that is very far from the partition range,
-which means that no matter how the partition strategy within this range is adjusted,
-the data transmission of this node's activation value is inevitable,
+Note that while the algorithm assumes the number of pipeline stages to be a power of 2,
+it is adaptable to any number of stages.
+When the remaining stages are reduced to three,
+the algorithm performs a traversal from the compute-balanced and memory-balanced partition positions of the first stage.
+Therefore, the proposed approach is capable of handling any arbitrary number of pipeline stages.
+
+\textbf{Communication Optimization:} A key assumption in the partitioning theorem is
+that communication overhead should not impact the efficiency of pipeline parallelism.
+Therefore, it is essential to avoid partition points that generate significant
+communication volumes during the traversal within the partition range.
+As discussed in Section~\ref{sec:mot}, the majority of computation nodes have very small activation memory.
+First, we can identify inevitable communication points,
+i.e., nodes with edges extending far outside
+the partition range where data transmission is unavoidable regardless of the partition strategy,
 such as the output of the initial embedding layer in BERT.
-Such memory communication can be ignored.
-For the remaining nodes, we will illustrate how to find a partition position
-with a smaller communication overhead via a simple example.
-Suppose there is a partition in which the activations of three nodes with the same depth
-need to transmitted to the next stage.
-Then we can find the lowest common leaf node of these nodes.
-If this node is the only edge they are connected to,
-then the partition that requires the transmission of multiple nodes' activation
-can be optimized to only need to transmit the activation of a single node.
-Meanwhile, such leaf node are usually very close to find,
-which means the impact on the computation time and memory footprint
-of the adjacent two stages is relatively small.
+This inevitable communication can be disregarded.
+For the remaining nodes, communication overhead can be minimized by optimizing the partition positions.
+For instance, if activations from multiple nodes at the same depth need to be transmitted to the next stage,
+the algorithm can identify the lowest common leaf node connecting these edges.
+If this leaf node is the sole connection point,
+the partition can be adjusted so that only the activation of this single node is transmitted, instead of multiple nodes.
+Such leaf nodes are typically easy to locate,
+resulting in minimal impact on both the computation time and memory usage of the adjacent stages.
 
 \subsection{Memory Optimization}
-The goal of memory optimization is to minimize the execution time
-of the stage while meeting the GPU memory limit for a given partitioning.
+The goal of memory optimization is to minimize the execution time of each stage
+while adhering to the GPU memory limits for a given partitioning.
 This objective is very similar to memory optimization in single-GPU training.
-Therefore, we utilize the cost model in Capuchin~\cite{pengCapuchinTensorbasedGPU2020}.
-In short, this model use \emph{FreeTime} and \emph{Memory Saving Per Second (MSPS)}
-for evaluating the memory swapping and recomputation, respectively.
-It first choose memory swapping until there is no computation
-to overlap the data transfer.
-Then the smaller performance overhead method between the memory swapping
-and recomputation will be adopted.
-In DawnPiper, we can easily obtain the memory optimization candidates through
-the saved tensors list of each node's metadata.
-Moreover, the \emph{FreeTime} and \emph{MSPS} of a candidate
-can also be calculated via the node's metadata.
+To achieve this, we employ the cost model from Capuchin~\cite{pengCapuchinTensorbasedGPU2020},
+which evaluates memory swapping and recomputation using \emph{FreeTime} and \emph{Memory Saving Per Second (MSPS)}.
+The model first applies memory swapping until data transfer can no longer overlap with computation.
+Then, it selects the method either memory swapping or recomputation that incurs the smallest performance overhead.
+In DawnPiper, memory optimization candidates are easily identified through each node's saved tensors list,
+and their \emph{FreeTime} and \emph{MSPS} can be calculated from the node’s metadata.
 
-Nonetheless, there are some differences in terms of memory swapping in pipeline parallelism.
-Firstly, multiple GPUs typically share the same host memory in pipeline parallelism.
-Therefore, the CPU memory is not an unlimited resources under such circumstances.
-For example, a 8 A100 GPUs server in which each stage swaps 40 GB memory,
-resulting in a total of 320 GB of CPU memory requirement.
-Moreover, such CPU memory needs to be page-locked
-for ensuring the asynchrony of memory swapping,
-which further increases the scarcity of this resource.
-Therefore, we limit the memory swapping size to one-fourth
-of the total host memory size by experience.
-Secondly, a memory swap in a micro-batch means that
-the same memory will be swapped multiple times
-in mainstream 1F1B scheduling pipeline parallelism.
+However, there are specific considerations for memory swapping in pipeline parallelism.
+Typically, multiple GPUs share the same host memory, which imposes limits on CPU memory availability.
+For instance, an 8-GPU A100 server that requires 40 GB of memory swap per stage
+would need a total of 320 GB of CPU memory.
+Additionally, this CPU memory must be page-locked to maintain the asynchrony of memory swapping,
+further constraining this resource.
+Consequently, we limit the memory swapping size to one-fourth of the total host memory size based on practical experience.
+Another consideration is that in a 1F1B scheduling pipeline parallelism,
+a single memory swap operation within a micro-batch can result in multiple swaps of the same memory.
 
 % Although the interval between memory swapping out and swapping in in the earlier stages is not only the inter-layer computation
 % in single-GPU training but also the computation of different micro-batches, for inputs with the same micro-batch number,

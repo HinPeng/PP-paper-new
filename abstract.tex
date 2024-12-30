@@ -1,20 +1,17 @@
 %!TEX root = main.tex
 \begin{abstract}
-Pipeline parallelism is a important parallelism paradigm for large-scale model training.
-However, there is a huge GPU memory wasting ,
-which 
-In this paper, we propose DawnPiper,
-a memory scablable pipeline parallel training framework.
-Firstly, we develop a DL compilation based profiling method to transform
-the submitted model to a fine-grained computation graph, 
-which can refine the granularity of the model partition and memory optimization,
-along with facilitating the automatic code generation.
-Based on the observation on the memory usage characteristics,
-we derive a pipeline parallelism partition theorem,
-which can effectively reduce the partition search space.
-Secondly, we propose a binary pipeline partition algorithm
-.
-We can .
-DawnPiper can accomplish up to 4$\times$ and 11$\times$ increase on trainable maximum batch size
-compared to vPipe and PipeDream, and up to 1.5$\times$ performance speedup compared to vPipe.
+Pipeline parallelism is a crucial paradigm for large-scale model training.
+However, imbalances in memory footprint across stages can lead to significant GPU memory wastage,
+limiting the model sizes that pipeline parallelism can effectively support.
+In this paper, we introduce DawnPiper, a memory-scalable pipeline parallel training framework. 
+Firstly, we develop a DL compilation-based profiling method that transforms the model into a fine-grained computation graph.
+This refinement gives us a finer granularity of model partitioning and memory optimization
+while facilitating automatic code generation.
+Based on observed memory usage characteristics,
+we derive a pipeline parallelism partition theorem that effectively reduces the partition search space. 
+Secondly, we propose a binary pipeline partitioning algorithm and
+utilize a cost-model based memory optimization approach to
+efficiently identify nearly optimal pipeline parallel strategy.
+DawnPiper achieves up to a 4$\times$ and 11$\times$ increase in trainable maximum batch size compared to vPipe and PipeDream, respectively,
+and provides up to a 1.5$\times$ performance speedup compared to vPipe.
 \end{abstract}
