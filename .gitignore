@@ -12,5 +12,4 @@ main*.pdf
 *.fls
 *.vscode
 comment.cut
-figures/
 .DS_Store
